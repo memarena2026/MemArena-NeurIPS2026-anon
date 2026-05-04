@@ -1,0 +1,19 @@
+% Populated 2026-04-19 — 10/10 §25 cells + 4/4 matched-k baselines done.
+% Regenerate via analyze-script if any cell re-runs.
+\begin{table}[h]
+\centering
+\small
+\caption{BM25 vs.\ BGE-M3 vs.\ BM25$+$rerank on \benchL (seed s1, judge GPT-4o-mini, matched top-$k{=}5$). BM25 in Table~\ref{tab:results-L} uses $k{=}10$ which over-credits larger readers by $6$--$25$ pp; rescored here at $k{=}5$. Reranker: \texttt{bge-reranker-v2-m3} top-$20\!\to\!5$. Dense lift is retriever-agnostic (E5-large-v2~\citep{wang2022e5} $\times$ Qwen3-8B sanity check at matched $k{=}5$: $+11.2$ pp, vs.\ BGE-M3's $+11.3$ pp). Hybrid RRF and per-chunk provenance prepending: Appendix~\ref{app:wave1}.}
+\label{tab:p1c-rag}
+\begin{tabular}{lccccc}
+\toprule
+Answer model         & BM25 (k=5) & BGE-M3 & $\Delta$ dense & BM25+rerank & BM25 $k{=}5{\to}10$ \\
+\midrule
+Qwen3-0.6B-bf16      & 0.336 & 0.426 & $+9.0$  & 0.333 ($-0.3$) & $+0.1$  \\
+Llama-3.2-3B-bf16    & 0.248 & 0.352 & $+10.4$ & 0.246 ($-0.2$) & $+14.0$ \\
+Mistral-7B-bf16      & 0.158 & 0.253 & $+9.5$  & 0.175 ($+1.7$) & $+25.2$ \\
+Qwen3-8B-bf16        & 0.396 & 0.509 & $+11.3$ & 0.385 ($-1.1$) & $+6.6$  \\
+Qwen3-32B-AWQ        & 0.352 & 0.485 & $+13.3$ & 0.352 ($+0.0$) & $+10.8$ \\
+\bottomrule
+\end{tabular}
+\end{table}

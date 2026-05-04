@@ -1,0 +1,21 @@
+\section{Related Work \texorpdfstring{\cred{[1.0 pages]}}{[1.0 pages]}}
+\label{sec:related}
+\para{Conversational Memory Benchmarks.}
+Conversational memory benchmarks have expanded from testing long-transcript fact retrieval to evaluating persistent and adaptive memory behavior.
+LoCoMo~\citep{maharana2024evaluating}, LongMemEval~\citep{wu2025longmemeval}, BEAM~\citep{tavakoli2025beam}, PersonaMem-v2~\citep{jiang2025personamemv2}, and MemGallery~\citep{bei2026memgallery} make long-horizon recall, temporal QA, contradictions, and answerability failures concrete over extended dialog histories. EverMemBench~\citep{hu2026evermembench} moves toward richer persistent environments through multi-party collaborative dialog, group-chat histories, evolving decisions, and role-conditioned personas for fine-grained recall, memory awareness, and profile understanding. MemoryBench~\citep{memorybench2025} studies continuous learning from simulated user feedback and behavior logs across multiple domains, languages, and task formats, rather than ego-centric conversational recall over a shared social world.
+
+As mentioned earlier, the above benchmarks are inadequate for evaluating AI agents' capability of working with on-device, personal, and persistent memory, due to the three structural gaps.
+Table~\ref{tab:comparison} makes this audit explicit: prior benchmarks cover important pieces of long-term memory evaluation, but \benchmark targets the combined setting of ego-centric, globally-coherent, and activity-dense conversational memory for personal agents.
+
+\input{tables/comparison}
+
+\para{Persistent Memory Systems.}
+%%XM \XM{For agentic AI, \st{Memory systems matter for our setting because they turn}personal memory is not a context-window problem, but a backend-design one.} 
+Closed-source persistent memory systems such as ChatGPT Memory~\citep{openai2024chatgptmemory} and Claude Memory~\citep{anthropic2025claudememory} show demand for persistent personalization, while open-source or publicly specified stacks such as Mem0~\citep{mem0_2024}, Memobase~\citep{memobase2025}, MemOS~\citep{memos2025}, Zep/Graphiti~\citep{rasmussen2025zep,zep2025graphiti}, and LangMem~\citep{langchain2025langmem} expose memory backends compatible with different readers. 
+This fast-growing line of work motivates \benchmark, to enable their evaluation not from a context-window perspective, but treating them as agentic backends dealing with ego-centric, on-device workloads.
+
+\para{Privacy and Permission.}
+Recent work around LLM disclosure splits into three threads. \emph{Theory.} Contextual-integrity accounts argue that appropriate disclosure depends on actor, recipient, and norm rather than on the surface fact alone~\citep{nissenbaum2004privacy}, recently re-articulated for agents as a vision for access-control evaluation~\citep{aacvision2025}. \emph{Single-turn / scenario benchmarks} probe whether a model respects social roles and norms on individually-presented disclosure decisions: can-it-keep-a-secret tests~\citep{mireshghallah2024can}, contextual-integrity scenario suites~\citep{privacylens2024,privacybench2024,magpie2025,ariel2025}, and RL post-training on synthetic CI examples~\citep{cireason2025}. \emph{Agentic / pipeline benchmarks} extend this to tool-use and multi-agent traffic, where leakage emerges from cross-tool aggregation, MCP/A2A messages, or inter-agent channels rather than a single response~\citep{agentdam2025,agentscope2026,privacyaction2025,topbench2025,agentleak2026}; on the systems side, two-tier shared/private memory with dynamic access graphs has been proposed as a mechanism but not benchmarked~\citep{collabmemory2025}. None of these works grade an agent on \emph{memory-conditioned} selective disclosure: whether the model first surfaces the right private content from a long-horizon ego-centric memory and then gates it on the current asker's permissions. \benchmark closes this gap (\S\ref{sec:benchmark}) and our results show why: full-local stacks fail this task either by amnesia or by anti-policy disclosure (Findings 1--2, \S\ref{sec:core-findings}).
+
+% ============================================================================
+% 3. BENCHMARK DESIGN

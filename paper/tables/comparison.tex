@@ -1,0 +1,46 @@
+\begin{table}[t]
+\centering
+\caption{Comparison of \benchmark with related memory benchmarks along three axes: the structural gaps identified in \S\ref{sec:intro}, corpus statistics, and the six evaluation dimensions. \cmark/\xmark indicate the dimension is/is not evaluated; $\sim$ indicates partial coverage. Footnotes carry per-cell definitions; full per-benchmark derivations are in App.~\ref{app:tab-comparison-details}.}
+\label{tab:comparison}
+\vspace{4pt}
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{@{}l ccccccc@{}}
+\toprule
+ & \textbf{LoCoMo} & \textbf{LongMemEval} & \textbf{BEAM (10M)} & \textbf{EverMemBench} & \textbf{PersonaMem-v2} & \textbf{MemGallery} & \cellcolor{ourscolor}\textbf{\benchmark} \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Structural differentiators (Gaps 1--3).}} \\
+\addlinespace[1pt]
+Perspective (Gap 1)          & Omniscient & Omniscient & Omniscient & Omniscient & Omniscient & Omniscient & \cellcolor{ourscolor}\textbf{Ego-centric} \\
+Global coherence (Gap 2)     & persona-scaffolded pairs & stitched sessions & indep.\ episodes & group chat & persona-driven LLM sim. & synth.\ + clustered sess. & \cellcolor{ourscolor}\textbf{single multi-agent sim} \\
+Activity-density (Gap 3)     & 0.3K$^a$   & ---$^b$    & ---$^b$    & ${\sim}$0.07K & ---$^b$    & ---$^b$    & \cellcolor{ourscolor}\textbf{$24.1$K}$^d$ \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Statistics.}} \\
+\addlinespace[1pt]
+Interaction topology         & dyadic & dyadic & dyadic & multi-user & dyadic & dyadic & \cellcolor{ourscolor}\textbf{multi-user} \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Evaluation dimensions.}} \\
+\addlinespace[1pt]
+\DOneDef & \xmark   & \xmark & \xmark   & \xmark   & \xmark & \xmark & \cellcolor{ourscolor}\cmark \\
+\DTwoDef & $\sim$ & \xmark & \xmark   & $\sim$ & \xmark & \xmark & \cellcolor{ourscolor}\cmark \\
+\DThreeDef (incl.\ temporal sub-types) & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cellcolor{ourscolor}\cmark \\
+\DFourDef & \cmark   & \cmark & \cmark   & \cmark   & \cmark & \cmark & \cellcolor{ourscolor}\cmark \\
+\DFiveDef (abstain / answer mode split) & $\sim$ & $\sim^g$ & $\sim$ & \xmark & \xmark & $\sim$ & \cellcolor{ourscolor}\cmark \\
+\DSixDef & \xmark   & \xmark & \xmark   & \xmark   & \xmark & \xmark & \cellcolor{ourscolor}\cmark \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+
+\vspace{4pt}
+\raggedright\scriptsize
+$^a$LoCoMo does not publish a calendar-day count; the entry reports tokens per speaker per dated session under a session-as-day proxy, derived in App.~\ref{app:tab-comparison-details}.
+$^b$``---'' denotes benchmarks that reach million-token scale via session concatenation or independent-episode sampling, with no defined daily interaction rate and (in most cases) no day boundaries.
+$^d$The ${\sim}$10K figure is a conservative human-conversation baseline. \benchmark reports the released text-only ego-observed workload: $24.1$K tokens/agent/day on average, excluding metadata, headers, and prompts; this comprises $18.0$K from person--person/social interactions and $6.1$K from person--agent sessions.
+$^g$LongMemEval's abstention sub-task covers 30 of the benchmark's 500 total evaluation questions ($6\%$); a never-abstain policy is thus upper-bounded at $94\%$ of the benchmark, so abstention minimally gates headline accuracy, whereas \DFiveID's balanced abstain-mode / answer-mode design forces every system to make an explicit abstain-vs-answer decision on the abstain-mode items.
+
+\vspace{-6pt}
+\end{table}

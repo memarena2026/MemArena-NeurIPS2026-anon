@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\caption{Case study on a \DFourName cross-session item (\texttt{d2\_f75feed06617}, Qwen3-32B, seed s2). The query asks the model to recall the topic of an earlier conversation about Tesla; the gold answer is anchored in one specific session about Pooja's dig site. Oracle is the only backend that surfaces the matched session, and the only backend that answers correctly. The four non-Oracle backends each fail through a categorically distinct mechanism: Vanilla recalls a different (irrelevant) Tesla mention from the same ego, BM25-RAG and MemSearch retrieve the lexically-related ``Tesla battery pack'' session from a different conversation, and Memobase blends multiple Tesla-related profiles into a confidently wrong summary. The same reader produces all five outputs --- changing which evidence reaches it changes the answer entirely.}
+\label{tab:case-d4-f75feed}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}p{0.09\textwidth} p{0.61\textwidth} c p{0.16\textwidth}@{}}
+\toprule
+\multicolumn{4}{@{}p{0.95\textwidth}}{\textbf{Question}: ``Going back to Tesla, I think it was first discussed a while ago and then referenced again. What do you recall?'' \quad\textbf{Gold}: ``Pooja was dealing with some wild stuff at her dig site and complaining about Tesla parts taking forever.''} \\
+\midrule
+\textbf{Backend} & \textbf{Output (verbatim, truncated)} & \textbf{Correct} & \textbf{Failure mode} \\
+\midrule
+Vanilla    & ``Amina mentioned her niece wanting a Tesla and joked about her learning to drive stick$\ldots$''                                                            & \xmark & wrong-session recall \\
+BM25-RAG   & ``Tesla was first mentioned in the context of a battery pack that was being waited on. Specifically, Amina Suleiman mentioned a Tesla$\ldots$''               & \xmark & lexical mis-retrieval \\
+Oracle     & ``Pooja was dealing with some wild stuff at her dig site and complaining about Tesla parts taking forever.''                                                 & \cmark & matched \\
+Memobase   & ``Amina discussed Tesla battery pack repairs with a 6-week delay$\ldots$ created a PDF to explain EV parts backlogs to customers and delayed two jobs$\ldots$'' & \xmark & compression conflation \\
+MemSearch  & ``Tesla was first mentioned in the context of a delayed battery pack that caused a conversation about Danny Lopez$\ldots$''                                  & \xmark & cross-session conflation \\
+\bottomrule
+\end{tabular}
+\end{table}

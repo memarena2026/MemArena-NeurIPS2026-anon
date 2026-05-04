@@ -1,0 +1,28 @@
+% Wave-1 ablation summary (H200 §H6 / §H7).
+% Populated 2026-04-24 from commits 9b9c8ba (B1), 202a7d5 (B2), 8036ce3 (B3),
+% 6f21ef2 (C1). All rows: Qwen3-8B-bf16, GPU 1, 4o-mini judge, 3 seeds.
+\begin{table}[h]
+\centering
+\small
+\caption{Pre-registered ablation summary on \benchL. Every row is
+Qwen3-8B-bf16 under GPT-4o-mini judge, three stochastic seeds. ``Best
+$\Delta$'' and ``worst $\Delta$'' report the largest signed per-dimension
+shift (paper-level dim ID in parentheses) relative to plain BM25 RAG at
+matched $k{=}5$ on the same reader.}
+\label{tab:wave1-summary}
+\begin{tabular}{lllll}
+\toprule
+Ablation & Lever tested & Best $\Delta$ & Worst $\Delta$ & Verdict \\
+\midrule
+Requester identity strength      & social / prompt  & \multicolumn{2}{c}{$0.00 \pm 0.87$ pp (\DSixID)} & null on \DSixID \\
+Hybrid-RRF retrieval             & retriever        & $+45$ pp (\DThreeID) & $-22$ pp (\DOneID) & retrieval-side trade-off \\
+Dense BGE-M3 top-5               & retriever        & $+37$ pp (\DThreeID) & $-18$ pp (\DOneID) & similar pattern \\
+Time-indexed Memobase            & provenance       & \multicolumn{2}{c}{---}                          & scoped null (no query time) \\
+Provenance-chunk header          & provenance       & $+37$ pp (confabulation)\textsuperscript{$\dagger$} & $-70$ pp (counterfactual) & shallow metadata hurts \\
+\bottomrule
+\end{tabular}
+
+\vspace{2pt}
+\footnotesize
+\textsuperscript{$\dagger$}Attributable to the dense retriever rather than to the metadata header; see Table~\ref{tab:wave1-perdim}.
+\end{table}

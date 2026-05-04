@@ -1,0 +1,180 @@
+================================================================================
+PROMPT -- Figure 1 (fig:fig1) -- Three structural gaps + MEMARENA panels
+For MEMARENA paper (NeurIPS 2026 submission).
+Target model: OpenAI gpt-image-2 / Nano Banana / Gemini-Image.
+Target aspect ratio: 16:9 (2560x1440), full-textwidth in NeurIPS layout.
+Target output: paper/figures/fig1.png
+================================================================================
+
+Create a clean, dense, academic teaser/architecture diagram for a computer
+science paper. The diagram contrasts three structural gaps in prior
+personal-agent memory benchmarks (left side) with five panels showing how
+MEMARENA closes them (right side).
+
+White background. Neutral sans-serif font. No 3D, no shadows, no gradients,
+no photos, no logos, no decorative clutter. Use a muted academic palette:
+cool gray for structure, soft blue for world/simulation components, soft
+amber for evaluation outputs, soft red for permission/access markers.
+
+Preserve the existing visual idiom of the previous Figure 1: a left "Existing
+Memory Benchmarks" column with X-marked gap icons, and a right "MEMARENA:
+Ego-Centric, Permission-Aware Memory Benchmark" panel containing five
+numbered cells. The five right-side cells are the part to update; cells (1)
+and (2) stay close to before; cells (3), (4), (5) are revised.
+
+# IMPORTANT: scope boundary
+
+Do NOT show "ego-centric projection $\pi(u_i, D)$" anywhere in this figure.
+That mechanism is already shown in Figure 2 (the MASim pipeline diagram in
+the data-generation section). This figure should focus on what is *visible
+to the reader of a benchmark eval*: the corpus shape, the question families,
+and the unique evaluation hooks.
+
+Do NOT use the words "ego-centric projection" or the formula $\pi$ inside
+the right-side panels. Use everyday phrasing like "per-user transcript".
+
+# LEFT COLUMN -- Existing Memory Benchmarks
+
+Title at top: "Existing Memory Benchmarks"
+
+Four stacked rows, each with a small X-mark icon on the left and a short
+gap-name label on the right:
+
+  X  Task-based         "one task at a time, no persistent state"
+  X  Omniscient         "test-side narrator can see everything"
+  X  Isolated episodes  "Q_i, Q_{i+1}, Q_{i+2} -- independent prompts"
+  X  No global coherence "no shared world; per-test scenarios"
+
+Add a subtle separator (vertical thin gray line) between left column and
+right panel.
+
+# RIGHT PANEL -- MEMARENA: Ego-Centric, Permission-Aware Memory Benchmark
+
+Title at top: "MEMARENA: Ego-Centric, Permission-Aware Memory Benchmark"
+
+Five numbered cells in a horizontal row (1 -> 2 -> 3 -> 4 -> 5).
+Connect adjacent cells with thin gray right-arrows so the reader sees the
+pipeline left to right.
+
+## Cell (1) -- Coherent social graph
+
+  Title:   "Coherent social graph"
+  Content: 6-8 named circular nodes (e.g. Alice, Bob, Charlie, ...).
+           Edge thickness = relationship strength.
+           Highlight one node with a thin outline labelled "ego".
+           Tiny note: "Dunbar-layered, 50 agents".
+
+## Cell (2) -- MEMARENA world simulation
+
+  Title:   "MASim world simulation"
+  Content: Four small badges stacked or in a grid:
+             "personas (RIASEC)"
+             "locations & schedules"
+             "events & visibility"
+             "permission tiers"
+           Tiny note: "one coherent world; partial observability".
+
+## Cell (3) -- Dense multi-day PP/PA dialogue streams  *(REVISED)*
+
+  Title:   "Dense multi-day, dual-stream dialogues"
+  Content: A horizontal day strip "Day 1 ... Day 5 ... Day 15" at the top.
+           Below the day strip, two parallel timelines:
+
+           Upper lane (label "person-person" or "PP"):
+             - Small chat bubbles between named pairs (e.g. "Alice <-> Bob").
+             - Tiny tag: "socially distributed evidence".
+
+           Lower lane (label "person-agent" or "PA"):
+             - Three chip types in chronological order:
+                "narration"        (user updates assistant)
+                "reflection"       (assistant revisits prior session)
+                "memory probe"     (assistant asks about a stored fact)
+             - Tiny tag: "natural memory updates and probes".
+
+           Activity-density caption underneath:
+             "24.1K text-only ego-observed tokens / agent / day".
+
+           This cell must visibly emphasise the PP / PA dual-stream design,
+           which prior benchmarks lack.
+
+## Cell (4) -- Ground truth + Query Hardener  *(REVISED -- replaces old "ego-centric projection" panel)*
+
+  Title:   "Ground truth and Query Hardener"
+  Content: Two sub-blocks side by side.
+
+           Sub-block A: "Simulation-derived ground truth"
+             Small chips (NO D-numbers needed; just the human-readable name):
+               "cloze fidelity"
+               "metadata completeness"
+               "cross-session reasoning"
+               "abstention"
+               "permission-aware access"
+             Tiny note: "exact functions of the logged world state".
+
+           Sub-block B: "LLM-generated, provenance-constrained"
+             One chip:
+               "factual QA"
+             With small sub-badges: "standard / temporal / counterfactual".
+
+           Below both sub-blocks, draw a horizontal "Query Hardener" bar
+           with four chips inside:
+             "paraphrase"
+             "temporal rewrite"
+             "counterfactual probe"
+             "perspective scoping"
+           Tiny note under the bar: "preserves evidence-session provenance".
+
+           This cell replaces the old ego-centric-projection panel.
+
+## Cell (5) -- Pool-stratified evaluation with permission marker  *(REVISED)*
+
+  Title:   "Pool-stratified evaluation"
+  Content: Show two structural specialties of MEMARENA's evaluation hooks
+           that prior benchmarks omit.
+
+           Top half: a small two-column block:
+             "ABSTENTION"
+                fabricated-premise pool   |   real-premise pool
+                (gold: refuse)            |   (gold: answer)
+             Tiny tag: "balanced D5 pool".
+
+           Bottom half: a small two-column block:
+             "PERMISSION-AWARE ACCESS"
+                ALLOW pool                |   DENY pool
+                (gold: disclose)          |   (gold: withhold)
+             Tiny tag: "explicit access markers in dialogue, e.g.\ 'keep
+             this between us'".
+
+           Right edge of cell (5): a database cylinder labelled
+             "MEMARENA eval instances".
+
+# Visual Constraints
+
+- Cells (3), (4), (5) are the visual emphasis: they carry MEMARENA's unique
+  contributions (PP/PA dual-stream, Query Hardener, ALLOW/DENY balanced
+  pools, permission marker). Use slightly stronger borders or fill on these
+  three than on (1) and (2).
+- Keep ALL text inside cells short (under six words per chip).
+- Distinguish all categories in grayscale print.
+- Do not use the term "ego-centric projection" or formula $\pi(u_i, D)$.
+- Do not include implementation filenames, internal task IDs, or deprecated
+  dimension labels (e.g.\ no "d4_perm_*", no "d3_confabulation").
+- Ensure all text remains legible at full NeurIPS textwidth.
+
+# Avoid
+
+Charts, axes, scatter plots, photorealistic people, brand logos, emoji,
+watermarks, saturated colors, glass effects, decorative ornaments, dense
+paragraphs, the formula $\pi(u_i, D)$, the words "ego-centric projection".
+
+# Cross-figure deconfliction
+
+This figure (Figure 1) must NOT visually overlap with Figure 2
+(fig:architecture, fig_architecture_prompt.txt) on these specific items,
+which Figure 2 owns:
+  - the MASim three-block "World State Construction / Activity-Dense
+    Co-Simulation / Co-Generated Benchmark Artifacts" pipeline structure,
+  - the explicit ego-centric projection $\pi(u_i, D)$,
+  - the per-session extraction provenance schematic.
+Figure 1 stays at the *what is unique about MEMARENA as a benchmark* level;
+Figure 2 stays at the *how MASim co-generates the data* level.

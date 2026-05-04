@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sections 2-4 Topic-Sentence Revision Preview</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --current: #f3f4f6;
+      --proposed: #edf7f2;
+      --accent: #126c4f;
+      --topic: #fff2cc;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(246, 247, 249, 0.96);
+      border-bottom: 1px solid var(--line);
+      padding: 18px 28px 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px 28px 48px;
+    }
+
+    section {
+      margin: 0 0 28px;
+    }
+
+    h2 {
+      margin: 28px 0 14px;
+      font-size: 20px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 8px;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--accent);
+    }
+
+    .pair {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .card.current {
+      background: var(--current);
+    }
+
+    .card.proposed {
+      background: var(--proposed);
+      border-color: #b7dfcb;
+    }
+
+    .label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .body {
+      padding: 14px 16px 16px;
+      font-size: 15px;
+    }
+
+    .topic {
+      background: var(--topic);
+      box-shadow: 0 0 0 2px var(--topic);
+      border-radius: 3px;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    .why {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .pair {
+        grid-template-columns: 1fr;
+      }
+
+      header,
+      main {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sections 2-4 Topic-Sentence Revision Preview</h1>
+    <p class="note">Citations are omitted in this preview. Yellow highlights mark the first-sentence / first-20% reader contract.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Section 2. Related Work</h2>
+
+      <h3>Conversational Memory Benchmarks</h3>
+      <p class="why">Goal: make the paragraph state not only the topic, but the trajectory of prior benchmarks.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Topic stated</span></div>
+          <div class="body">
+            <p><span class="topic">Recent memory benchmarks make different parts of the personal-memory problem measurable.</span> LoCoMo and LongMemEval anchor the long-transcript line, alongside related transcript-centric suites such as BEAM, PersonaMem-v2, and MemGallery; these benchmarks make long-horizon recall, temporal QA, and retrieval failures concrete over extended dialogue histories.</p>
+            <p>EverMemBench moves toward richer persistent environments through multi-party collaborative dialogue, group-chat histories, evolving decisions, role-conditioned personas, and tasks for fine-grained recall, memory awareness, and profile understanding.</p>
+            <p>MemoryBench studies continual adaptation from simulated user feedback across multiple domains, languages, and task formats, rather than conversational recall over a fixed dialogue history. Taken together, these benchmarks show that personal-memory evaluation spans long-horizon recall, persistent social interaction, and continual adaptation. Table 1 situates MEMARENA within this space, where our focus is ego-centric, activity-dense, permission-aware conversational memory.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Trajectory stated</span></div>
+          <div class="body">
+            <p><span class="topic">Conversational memory benchmarks have expanded from asking whether models can retrieve facts from long transcripts to asking how memory behaves in persistent and adaptive settings.</span> LoCoMo and LongMemEval anchor the long-transcript line, alongside related transcript-centric suites such as BEAM, PersonaMem-v2, and MemGallery; these benchmarks make long-horizon recall, temporal QA, and retrieval failures concrete over extended dialogue histories.</p>
+            <p>EverMemBench moves toward richer persistent environments through multi-party collaborative dialogue, group-chat histories, evolving decisions, role-conditioned personas, and tasks for fine-grained recall, memory awareness, and profile understanding.</p>
+            <p>MemoryBench studies continual adaptation from simulated user feedback across multiple domains, languages, and task formats, rather than conversational recall over a fixed dialogue history. Taken together, these benchmarks show that personal-memory evaluation spans long-horizon recall, persistent social interaction, and continual adaptation. Table 1 situates MEMARENA within this space, where our focus is ego-centric, activity-dense, permission-aware conversational memory.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Persistent Memory Systems</h3>
+      <p class="why">Goal: tell the reader why systems belong in related work before listing product and open-source examples.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Relation stated later</span></div>
+          <div class="body">
+            <p><span class="topic">Benchmarks define what should be measured; deployed memory systems define the backend families that personal agents are beginning to use.</span> Closed-source product memories such as ChatGPT Memory and Claude Memory show demand for persistent personalization, while open-source or publicly specified stacks such as Mem0, Memobase, MemOS, Zep/Graphiti, and LangMem expose memory backends that can be paired with different readers.</p>
+            <p>This system line motivates evaluating backend behavior under one ego-centric, on-device workload rather than treating memory as only a model-context problem.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Purpose first</span></div>
+          <div class="body">
+            <p><span class="topic">Memory systems matter for our setting because they turn personal memory from a context-window problem into a backend-design problem.</span> Closed-source product memories such as ChatGPT Memory and Claude Memory show demand for persistent personalization, while open-source or publicly specified stacks such as Mem0, Memobase, MemOS, Zep/Graphiti, and LangMem expose memory backends that can be paired with different readers.</p>
+            <p>This system line motivates evaluating backend behavior under one ego-centric, on-device workload rather than treating memory as only a model-context problem.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Privacy and Permission</h3>
+      <p class="why">Goal: move from a broad privacy topic to the concrete reason D6 belongs in the benchmark.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Benchmark requirement</span></div>
+          <div class="body">
+            <p><span class="topic">A personal-memory benchmark should ask not only whether an assistant can recall a fact, but whether that fact should be disclosed to the current requester.</span> Privacy work around LLMs and agents increasingly frames disclosure as contextual rather than binary, drawing on contextual integrity and testing whether models respect social roles, norms, and access boundaries.</p>
+            <p>We use this idea operationally: D6 evaluates requester-conditioned access decisions against explicit scenario permissions, so a personal memory assistant must decide both what it knows and what it is allowed to say.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Failure mode first</span></div>
+          <div class="body">
+            <p><span class="topic">Permission matters because a personal assistant can be wrong even when it recalls the right fact.</span> A personal-memory benchmark should therefore ask not only whether an assistant can recover information, but whether that information should be disclosed to the current requester.</p>
+            <p>Privacy work around LLMs and agents increasingly frames disclosure as contextual rather than binary, drawing on contextual integrity and testing whether models respect social roles, norms, and access boundaries. We use this idea operationally: D6 evaluates requester-conditioned access decisions against explicit scenario permissions, so a personal memory assistant must decide both what it knows and what it is allowed to say.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Section 3. Benchmark Design</h2>
+
+      <h3>Opening Taxonomy Paragraph</h3>
+      <p class="why">Goal: make clear that the paragraph answers "what failure types should the benchmark expose?"</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Taxonomy first</span></div>
+          <div class="body">
+            <p><span class="topic">MEMARENA turns the gaps from Section 1 into three top-level evaluation categories, operationalized as six concrete dimensions.</span> Inspired by HELM's multi-faceted evaluation methodology and loosely by the episodic-semantic distinction in human memory, the categories are Memory Recall, Memory Reasoning, and Memory Trustworthiness.</p>
+            <p>At a high level, they ask whether an agent can faithfully recover what it observed, reason over that evidence across time and sessions, and use memory responsibly under abstention and access-control constraints. Table 2 summarizes the resulting D1-D6 dimensions.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Design question first</span></div>
+          <div class="body">
+            <p><span class="topic">The first design question is what kinds of memory failures a personal agent should expose.</span> MEMARENA answers this by turning the gaps from Section 1 into three top-level evaluation categories, operationalized as six concrete dimensions.</p>
+            <p>Inspired by HELM's multi-faceted evaluation methodology and loosely by the episodic-semantic distinction in human memory, the categories are Memory Recall, Memory Reasoning, and Memory Trustworthiness. At a high level, they ask whether an agent can faithfully recover what it observed, reason over that evidence across time and sessions, and use memory responsibly under abstention and access-control constraints. Table 2 summarizes the resulting D1-D6 dimensions.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Design Principles Paragraph</h3>
+      <p class="why">Goal: clarify that the three principles are measurement constraints, not just labels.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Principles named</span></div>
+          <div class="body">
+            <p><span class="topic">Three design principles make those dimensions measurable in the target personal-agent setting.</span> Ego-centric projection means each user's observable history is restricted to conversations they actually participated in or witnessed.</p>
+            <p>Activity-density calibration means corpus scale is set to roughly 10K tokens/person/day with explicit day boundaries, so write pressure, recency, and temporal provenance are part of the workload. Single-world provenance means all sessions are generated inside one coherent MASim world over persona-driven agents and Dunbar-layered social graphs, so recurring people, events, locations, and permissions can be traced back to logged evidence rather than stitched fragments.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Measurement problem first</span></div>
+          <div class="body">
+            <p><span class="topic">The second design question is how to make those six dimensions measurable under personal-agent constraints.</span> MEMARENA fixes three principles.</p>
+            <p>Ego-centric projection means each user's observable history is restricted to conversations they actually participated in or witnessed. Activity-density calibration means corpus scale is set to roughly 10K tokens/person/day with explicit day boundaries, so write pressure, recency, and temporal provenance are part of the workload. Single-world provenance means all sessions are generated inside one coherent MASim world over persona-driven agents and Dunbar-layered social graphs, so recurring people, events, locations, and permissions can be traced back to logged evidence rather than stitched fragments.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Formal Definitions Paragraph</h3>
+      <p class="why">Goal: make the appendix pointer feel intentional rather than abrupt.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Pointer only</span></div>
+          <div class="body">
+            <p><span class="topic">Formal definitions of the scenario tuple, evaluation instance, and scoring axioms are in Appendix.</span></p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Main-text scope stated</span></div>
+          <div class="body">
+            <p><span class="topic">We keep the main text focused on the benchmark interface and defer the mathematical specification.</span> Formal definitions of the scenario tuple, evaluation instance, and scoring axioms are in Appendix.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Diagnostic Profile Paragraph</h3>
+      <p class="why">Goal: state why D1-D6 are reported as a profile without defensive comparison.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Self-description</span></div>
+          <div class="body">
+            <p><span class="topic">MEMARENA reports D1-D6 as a diagnostic profile of personal-agent memory.</span> The profile localizes failures across recall, temporal and cross-session reasoning, provenance, abstention, and requester-conditioned disclosure. Appendix gives additional design details.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Subtask role clarified</span></div>
+          <div class="body">
+            <p><span class="topic">MEMARENA reports D1-D6 as a diagnostic profile of personal-agent memory rather than as interchangeable subtasks.</span> The profile localizes failures across recall, temporal and cross-session reasoning, provenance, abstention, and requester-conditioned disclosure. Appendix gives additional design details.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Bridge Paragraph</h3>
+      <p class="why">Goal: make the move from measurement target to data generation explicit.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Bridge</span></div>
+          <div class="body">
+            <p><span class="topic">Having defined what MEMARENA measures, we next describe how MASim instantiates these dimensions as coherent ego-centric worlds with co-generated dialogue histories, ground truth, and evaluation instances.</span></p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Remaining question stated</span></div>
+          <div class="body">
+            <p><span class="topic">With the measurement target fixed, the remaining question is how to generate histories where these dimensions have well-defined evidence.</span> We next describe how MASim instantiates them as coherent ego-centric worlds with co-generated dialogue histories, ground truth, and evaluation instances.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Section 4. Data Generation via Multi-Agent Simulation</h2>
+
+      <h3>Opening Paragraph</h3>
+      <p class="why">Goal: tell readers that MASim exists to make evidence and labels well-defined, then teach them how to read Figure 2.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Requirement first</span></div>
+          <div class="body">
+            <p><span class="topic">MEMARENA requires dialogue histories that are simultaneously multi-user, multi-session, long-horizon, and provenance-traceable.</span> We therefore construct the benchmark with MASim, an evaluation-aware simulator in which much of the ground truth emerges directly from logged world state rather than post-hoc annotation.</p>
+            <p>Figure 2 summarizes the pipeline. After generation, we perform human calibration on sampled evaluation instances and judge decisions; details are in Appendix and Table.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Purpose and figure-reading first</span></div>
+          <div class="body">
+            <p><span class="topic">MASim exists to make the benchmark evidence well-defined, not merely to produce long text.</span> MEMARENA requires dialogue histories that are simultaneously multi-user, multi-session, long-horizon, and provenance-traceable.</p>
+            <p>We therefore construct the benchmark with MASim, an evaluation-aware simulator in which much of the ground truth emerges directly from logged world state rather than post-hoc annotation. Figure 2 should be read from left to right: MASim builds a shared social world, projects it into user-specific histories, and emits evidence-linked evaluation instances. After generation, we perform human calibration on sampled evaluation instances and judge decisions; details are in Appendix and Table.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Simulator Paragraph</h3>
+      <p class="why">Goal: emphasize that world and assistant-facing memory stream are co-generated before questions are sampled.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Role stated</span></div>
+          <div class="body">
+            <p><span class="topic">MASim's role is to create the social world and the assistant-facing memory stream together, before any evaluation question is sampled.</span> Each simulated person is a persona-driven agent with RIASEC-typed personality, structured memory, and persistent social ties on a Dunbar-layered graph. A world event broadcaster routes events through a visibility matrix, creating controlled information asymmetry while preserving full provenance.</p>
+            <p>From this shared state, MASim generates two complementary dialogue streams. Person-person sessions build the social world through schedules, events, groups, locations, and remote contact. Person-agent sessions model the personal-assistant interface through activity narration, memory reflection, and memory probes. Thus person-person dialogue supplies socially distributed evidence, while person-agent dialogue supplies natural memory updates and memory queries. Both streams are finalized into the same provenance-tracked state before evaluation instances are built.</p>
+            <p>Full agent formalization, prompts, and scheduling are in Appendices; corpus distribution statistics and a representative dialogue exemplar are in Appendix.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Slightly more direct</span></div>
+          <div class="body">
+            <p><span class="topic">The simulator first creates the social world and the assistant-facing memory stream before any evaluation question is sampled.</span> Each simulated person is a persona-driven agent with RIASEC-typed personality, structured memory, and persistent social ties on a Dunbar-layered graph. A world event broadcaster routes events through a visibility matrix, creating controlled information asymmetry while preserving full provenance.</p>
+            <p>From this shared state, MASim generates two complementary dialogue streams. Person-person sessions build the social world through schedules, events, groups, locations, and remote contact. Person-agent sessions model the personal-assistant interface through activity narration, memory reflection, and memory probes. Thus person-person dialogue supplies socially distributed evidence, while person-agent dialogue supplies natural memory updates and memory queries. Both streams are finalized into the same provenance-tracked state before evaluation instances are built.</p>
+            <p>Full agent formalization, prompts, and scheduling are in Appendices; corpus distribution statistics and a representative dialogue exemplar are in Appendix.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Built-in Ground Truth and Ego-Centric Projection</h3>
+      <p class="why">Goal: tell readers the paragraph converts generated world state into labels and user-specific evidence.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Mechanisms first</span></div>
+          <div class="body">
+            <p><span class="topic">Ground truth derives from two mechanisms.</span> Simulation-derived labels for D1, D2, D4, D5, and D6 are exact functions of the logs and require no annotation. LLM-generated labels for D3 are hardened via paraphrase rewriting, temporal rewrites, and counterfactual probes; where paraphrase hardening applies, we enforce Jaccard lower than 0.3 so that queries do not reuse near-verbatim corpus phrasing.</p>
+            <p>After generation, an ego-centric projection converts the shared world trace into each user's observable history. We also define an oracle-retrieval view that exposes only the annotated evidence sessions for each query, allowing us to separate retrieval failure from downstream reading and reasoning.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Conversion task first</span></div>
+          <div class="body">
+            <p><span class="topic">MASim then turns the generated world into benchmark labels and user-specific evidence views.</span> Ground truth derives from two mechanisms. Simulation-derived labels for D1, D2, D4, D5, and D6 are exact functions of the logs and require no annotation. LLM-generated labels for D3 are hardened via paraphrase rewriting, temporal rewrites, and counterfactual probes; where paraphrase hardening applies, we enforce Jaccard lower than 0.3 so that queries do not reuse near-verbatim corpus phrasing.</p>
+            <p>After generation, an ego-centric projection converts the shared world trace into each user's observable history. We also define an oracle-retrieval view that exposes only the annotated evidence sessions for each query, allowing us to separate retrieval failure from downstream reading and reasoning.</p>
+          </div>
+        </article>
+      </div>
+
+      <h3>Temporal Isolation and Batching</h3>
+      <p class="why">Goal: frame temporal isolation as a synchronization choice, not as leakage or a human-memory claim.</p>
+      <div class="pair">
+        <article class="card current">
+          <div class="label"><span>Current</span><span>Rule framed as count</span></div>
+          <div class="body">
+            <p><span class="topic">The simulator also needs a rule for how many near-simultaneous interactions can proceed before their newly created memories are synchronized.</span> MASim therefore discretizes time into synchronization intervals: within one interval, person-person and person-agent sessions are generated from the same start-of-interval memory snapshot, and extracted facts, feelings, and metadata are committed together when the interval closes.</p>
+            <p>This is a modeling choice about when personal-agent activity streams synchronize, not a claim that human memory updates only at that granularity. We instantiate the interval as one simulated day because MEMARENA is calibrated to an activity-density target of roughly 10K tokens/person/day, and daily schedules provide an interpretable unit for routines, locations, encounters, and event visibility. Other synchronization intervals could be used for deployments requiring finer state propagation, but day-level intervals match our density target while preserving week-scale, multi-session dependencies. Engineering details and ablations are deferred to Appendix.</p>
+          </div>
+        </article>
+        <article class="card proposed">
+          <div class="label"><span>Proposed</span><span>Synchronization choice first</span></div>
+          <div class="body">
+            <p><span class="topic">The final generation choice is how quickly newly created memories become available to other near-simultaneous interactions.</span> MASim discretizes time into synchronization intervals: within one interval, person-person and person-agent sessions are generated from the same start-of-interval memory snapshot, and extracted facts, feelings, and metadata are committed together when the interval closes.</p>
+            <p>This is a modeling choice about when personal-agent activity streams synchronize, not a claim that human memory updates only at that granularity. We instantiate the interval as one simulated day because MEMARENA is calibrated to an activity-density target of roughly 10K tokens/person/day, and daily schedules provide an interpretable unit for routines, locations, encounters, and event visibility. Other synchronization intervals could be used for deployments requiring finer state propagation, but day-level intervals match our density target while preserving week-scale, multi-session dependencies. Engineering details and ablations are deferred to Appendix.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

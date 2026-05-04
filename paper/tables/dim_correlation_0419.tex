@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Pairwise Spearman correlation between per-agent dimension accuracies on \benchL for Oracle-32B, where each agent-level dimension score is averaged over stochastic seeds s2--s4 from the canonical run \texttt{l\_20260408\_111046}. The largest off-diagonal magnitude is the D3--D5 pair at $|\rho|=0.40$, followed by D2--D5 at $|\rho|=0.35$.}
+\label{tab:dim-correlation}
+\small
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+& \textbf{\DOneID} & \textbf{\DTwoID} & \textbf{\DThreeID} & \textbf{\DFourID} & \textbf{\DFiveID} & \textbf{\DSixID} \\
+\midrule
+\textbf{\DOneID} & 1.00 & 0.00 & 0.16 & -0.17 & 0.15 & -0.10 \\
+\textbf{\DTwoID} & 0.00 & 1.00 & 0.09 & 0.02 & -0.35 & 0.06 \\
+\textbf{\DThreeID} & 0.16 & 0.09 & 1.00 & 0.12 & 0.40 & 0.05 \\
+\textbf{\DFourID} & -0.17 & 0.02 & 0.12 & 1.00 & -0.07 & 0.08 \\
+\textbf{\DFiveID} & 0.15 & -0.35 & 0.40 & -0.07 & 1.00 & 0.07 \\
+\textbf{\DSixID} & -0.10 & 0.06 & 0.05 & 0.08 & 0.07 & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{table}

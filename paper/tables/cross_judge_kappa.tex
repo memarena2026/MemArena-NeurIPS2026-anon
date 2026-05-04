@@ -1,0 +1,29 @@
+\begin{table}[h]
+\centering
+\caption{Cross-judge agreement on the 12 structured-memory cells used in the appendix structured-memory analysis. GPT-4o-mini is the primary judge and Qwen3-235B is the secondary judge. Agreement is the raw fraction of dual-scored rows on which the judges assign the same correct/incorrect verdict; $\kappa$ is Cohen's chance-corrected agreement on the same rows. The gap between high raw agreement and lower $\kappa$ in the strongest cells is the usual prevalence effect: when almost all rows are correct, a few disagreements on the rare negative class depress $\kappa$ disproportionately.}
+\label{tab:cross-judge-kappa}
+\small
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Cell} & Agreement & $\kappa$ & $n$ dual-scored \\
+\midrule
+Memobase $\times$ Qwen3-0.6B & 0.833 & 0.663 & 1379 \\
+Memobase $\times$ Llama-3.2-3B & 0.812 & 0.523 & 1379 \\
+Memobase $\times$ Qwen3-8B & 0.840 & 0.512 & 1379 \\
+Memobase $\times$ Qwen3-32B & 0.864 & 0.401 & 1379 \\
+Memobase $\times$ gpt-4.1-mini (Config B) & 0.872 & 0.659 & 1379 \\
+\midrule
+MemOS $\times$ Qwen3-0.6B & 0.830 & 0.659 & 1379 \\
+MemOS $\times$ Llama-3.2-3B & 0.814 & 0.523 & 1379 \\
+MemOS $\times$ Qwen3-8B & 0.840 & 0.526 & 1379 \\
+MemOS $\times$ Qwen3-32B & 0.861 & 0.400 & 1379 \\
+MemOS $\times$ gpt-4.1-mini (Config B) & 0.864 & 0.638 & 1379 \\
+\midrule
+Mem0 $\times$ Qwen3-0.6B & 0.835 & 0.668 & 1379 \\
+Mem0 $\times$ gpt-4.1-mini (Config B) & 0.866 & 0.644 & 1379 \\
+\midrule
+\textbf{Mean} & \textbf{0.844} & \textbf{0.568} & \textbf{1379} \\
+\bottomrule
+\end{tabular}
+\end{table}

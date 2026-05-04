@@ -1,0 +1,162 @@
+\subsection{Pre-Registered Ablations}
+\label{app:wave1}
+
+Four directed probes on Qwen3-8B-bf16 against \benchL, each with
+three stochastic seeds (s1, s2, s3) under a GPT-4o-mini judge. Every
+ablation was pre-registered via a kickoff commit with falsifiable
+hypotheses before the matching completion commit landed the numbers.
+Numbers below are reported under the new $5$-label \DSixID rubric
+(\S\ref{sec:eval-method}); pre-registered binary-correctness deltas from
+the original commits are retained in parentheses where useful.
+
+\para{Requester-identity strength (Finding 1 refinement).}
+Tests whether the social-context-gating result on \DSixDef
+collapses or strengthens when the prompt over- or under-specifies the
+requester. The ablation runs three identity levels on \DSixID and
+\DFiveDef query prompts under an otherwise fixed pipeline:
+\textsc{L0} no identity mention, \textsc{L1} the requester's name
+only, and \textsc{L2} the requester's name plus social relationship
+and conversational context. Under the new $5$-label rubric, $\mathrm{F1}_\mathrm{PU}$
+moves $41.9 \to 42.6 \to 34.8$ across \textsc{L0}/\textsc{L1}/\textsc{L2};
+ALLOW \textsc{disclose\_correct} rises $47.5\% \to 51.7\% \to 47.5\%$
+while DENY leak rises $62.5\% \to 63.8\% \to 72.5\%$. The pre-registered
+binary-correctness null ($\Delta = 0.00 \pm 0.87$\,pp on \DSixID,
+commit \texttt{9b9c8ba}) survives only at the leak/no-leak granularity:
+identity strength tunes disclosure \emph{confidence} (both ALLOW DC
+and DENY leak rise together) without producing a real permission
+gate. Table~\ref{tab:d6-ablation-sweep} places these three cells
+alongside the rest of the sweep.
+
+\para{Stronger-than-BM25 retrieval (Finding 2 retrieval-side stress test).}
+Tests whether any retrieval-side upgrade closes the Memobase/MemOS
+gap. Three variants are swept on Qwen3-8B: (i) hybrid-RRF fusion of
+BM25 and BGE-M3 top-$k$ lists; (ii) an entity-filter that restricts
+BM25 to sessions mentioning entities found in the query; (iii) a
+temporal-prior that re-weights BGE-M3 scores by recency, with a
+$\lambda \in \{0, 0.25, 0.5, 1.0\}$ mini-sweep at s1 followed by
+three-seed runs at $\lambda = 0.5$. Hybrid-RRF wins overall:
+$\DThreeID$ rises by $+45$\,pp but $\DOneID$ drops by $-22$\,pp;
+entity-filter and temporal-prior each trade off differently but no
+variant reaches Memobase- or MemOS-level on either \DFourDef or
+\DSixDef (commit \texttt{202a7d5}). Under matched $k{=}5$ the
+dense-only BGE-M3 baseline at \DThreeID$+37$\,pp, \DOneID$-18$\,pp
+is already reported in Table~\ref{tab:p1c-rag}; Table~\ref{tab:wave1-summary}
+places the retrieval variants alongside it.
+
+\para{Time-indexed Memobase (scoped null).}
+Tests whether giving Memobase a \texttt{query\_time} field on each
+retrieval pass helps on cross-session temporal queries. On \benchL
+the corpus contains no \texttt{query\_time} metadata, so the filter
+degenerates to a no-op; we include the run as a scoped null:
+$\DThreeID = 60.6$, $\DSixID = 74.0$, both within the Memobase
+baseline range across three seeds (commit \texttt{8036ce3}). This
+constrains the claim ``structured memory uses temporal provenance''
+to settings where ingest actually stamps time at turn granularity;
+we flag this as a future-work prerequisite rather than a null result
+on the underlying idea.
+
+\para{Provenance-chunking RAG (Finding 2 \& 3 reinforcement).}
+Tests whether prepending a chunk-level header
+$\texttt{[session=X day=Y speaker=Z time=T]}$ to each BGE-M3 top-$5$
+retrieved passage recovers cross-session reasoning
+(Table~\ref{tab:wave1-perdim}). The pre-registered hypotheses were:
+
+\begin{itemize}
+\itemsep=1pt\topsep=2pt
+\item $\DFourID$ (d8\_temporal) recovers under
+  provenance. \textbf{FALSIFIED} ($-24.7$\,pp vs.\ plain BM25 RAG).
+\item $\DOneID$ (d5\_cloze) does not recover.
+  \textbf{CONFIRMED} ($+4.9$\,pp, flat within seed noise).
+\item $\DThreeID$ (d7\_qa) and \DSixID (d4\_permission)
+  remain flat. \textbf{FALSIFIED}: $\DThreeID$ collapses by
+  $-59.8$\,pp and $\DSixID$ by $-15.0$\,pp.
+\end{itemize}
+
+Seven of nine internal dimensions degrade; only d3\_confabulation gains
+$+37$\,pp, and the commit body attributes that gain to the underlying
+dense retriever surfacing more abstainable context rather than to the
+metadata header itself (commit \texttt{6f21ef2}). The combined message
+of the retrieval and provenance ablations is that on \benchL no retrieval-side modification ---
+neither stronger fusion nor per-chunk provenance tokens --- narrows
+the gap left by \DFourID / \DSixID / \DTwoID; the gap is
+structural, not a retrieval-strength or metadata-signal gap.
+
+\para{Hypothesised mechanism.}
+Two non-mutually-exclusive accounts are consistent with the
+direction and per-dim shape of the C1 effect. \emph{(i)~Attention
+budget.} Each header expands every retrieved chunk by ${\sim}10$
+tokens of high-frequency structured markers ($\texttt{[session=}$,
+$\texttt{day=}$, $\texttt{speaker=}$, $\texttt{time=}$); at top-$5$
+this is ${\sim}50$ overhead tokens that displace content tokens
+under the same context budget. \emph{(ii)~Format-prior shift.}
+Structured-syntax markers may activate code-/structured-data
+attention regimes rather than narrative-content reading, dampening
+multi-hop integration on dimensions that require reasoning over
+chunk content (\DFourID, \DSixID, \DThreeID) while sparing
+surface-recall on \DOneID. The d3\_confabulation $+37$\,pp gain
+under this view is consistent with the format prior also biasing
+the reader toward abstention on confabulation-style queries, a
+register effect rather than a retrieval-quality effect. We do
+not isolate (i) vs.\ (ii) experimentally; the two predict the
+same direction for every cell we observe, so the wave-1 evidence
+falsifies the metadata-signal hypothesis without identifying the
+mechanism by which the header degrades reading.
+
+\input{tables/appendix_wave1_summary}
+\input{tables/appendix_wave1_perdim}
+
+\subsection{Ablation Sweep on \DSixID}
+\label{app:retrieval-sweep}
+
+The five-axis ablation sweep referenced in \S\ref{sec:ablation-studies}
+covers $142$ \DSixID cells across retrieval-side, reader-scale,
+distractor, prompt-side and identity-strength controls. Every cell is
+re-judged under the same $5$-label rubric used in
+Appendix~\ref{app:dim-permission}. Pooled metrics are reported in
+Table~\ref{tab:d6-ablation-sweep}.
+
+\input{tables/d6_ablation_sweep}
+
+The six blocks reinforce Findings~1 and~2 in distinct ways.
+\emph{Retrieval} (top block) shows that no upgrade over the BM25 / Oracle
+backbone closes the matched-evidence gap on \DSixID: every variant
+collapses ALLOW \textsc{disclose\_correct} below $5\%$ and the best
+$\mathrm{F1}_\mathrm{PU}$ ($7.7$ for the temporal-prior) is still $5{\times}$
+below the lowest Oracle baseline.
+\emph{Reader scale} shows the anti-policy gap growing monotonically with
+reader capacity ($+6.1$\,pp at Qwen3-0.6B to $+26.6$\,pp at Qwen3-32B);
+$\mathrm{F1}_\mathrm{PU}$ peaks in the middle of the reader-scale axis
+(Mistral-7B, $44.1$) because the smallest reader trades disclosure for
+amnesia and the largest leaks too much.
+\emph{Distractor} confirms that Mode~2 anti-policy disclosure is
+intrinsic to reader prompt-following rather than a retrieval artefact:
+pooled $\mathrm{F1}_\mathrm{PU}$ is $41.9$ / $40.1$ / $41.4$ across the
+no-/curated-/random-distractor conditions, and \DFourID accuracy is
+flat at $79.1$ / $78.7$ / $79.7\%$. Adding up to $8$K tokens of
+irrelevant sessions modulates neither leakage nor cross-session
+reasoning.
+\emph{Policy lever} contains the blanket-abstention extreme of Mode~1:
+the provenance-aware reader has $\mathrm{F1}_\mathrm{PU}{=}1.0$ with $48\%$
+\textsc{don't\_know} and $49\%$ \textsc{other} on $200$ items, while the
+explicit DENY-tag prompt is roughly neutral on $\mathrm{F1}_\mathrm{PU}$
+but shifts $5\%$ of responses to \textsc{refuse} and $26\%$ to
+\textsc{don't\_know}.
+\emph{Identity strength} (wave-1, Qwen3-8B Oracle) tunes disclosure
+\emph{confidence} rather than gating: ALLOW \textsc{disclose\_correct}
+rises $47.5\%{\to}51.7\%{\to}47.5\%$ and DENY leak rises
+$62.5\%{\to}63.8\%{\to}72.5\%$ across $\textsc{L0}/\textsc{L1}/\textsc{L2}$
+identity contexts, with $\mathrm{F1}_\mathrm{PU}$ peaking at $\textsc{L1}$
+($42.6$). Stronger requester-identity prompts therefore raise both arms
+of the $2{\times}2$ symmetrically, falsifying the hypothesis that
+asker-identity cues impose a permission gate at inference time.
+Detailed per-reader and per-seed breakdowns are deferred to the project
+release; the pooled signal is summarised here.
+
+% Commit trail:
+%   4199ba8 B1 kickoff; 9b9c8ba B1 complete (requester-identity null on D6)
+%   226abb9 B2 kickoff; 202a7d5 B2 complete (hybrid-RRF wins; trade-offs persist)
+%   b1ca7e6 B3 infra;   8036ce3 B3 complete (scoped null, needs query_time)
+%   b11d766 C1 kickoff; 6f21ef2 C1 complete (provenance mostly hurts)
+% 142-cell sweep judged under 5-label rubric (commit pending) on $2026$-$05$-$04$.
+% Output root: MASim/runs/l_20260408_111046/eval_results/ablations/{b1,b2,b3,c1}*/
+% Sweep root: out/ablations_l_*/.

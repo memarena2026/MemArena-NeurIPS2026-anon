@@ -1,0 +1,230 @@
+================================================================================
+PROMPT -- Figure 2 (fig:architecture) -- MASim co-generation pipeline
+For MEMARENA paper (NeurIPS 2026 submission).
+Target model: OpenAI gpt-image-2.
+Target aspect ratio: 16:9 (2560x1440).
+Target output: paper/figures/figarch02.png
+================================================================================
+
+Create a clean, dense, academic methodology diagram for a computer science
+paper. The diagram explains MASim, the evaluation-aware simulator that
+co-generates the MEMARENA dialogue corpus and its evaluation instances.
+
+White background. Neutral sans-serif font. No 3D, no shadows, no gradients,
+no photos, no logos, no decorative clutter. Use a muted academic palette:
+cool gray for structure, soft blue for world/simulation components, soft
+green for outputs, and soft amber for small badges.
+
+The central message of the figure must be visually obvious:
+
+  MASim does not generate conversations first and annotate questions later.
+  The dialogue corpus, logged world state, source-session provenance,
+  ground truth, and evaluation questions are co-produced from the same
+  simulation trace.
+
+Use three large left-to-right blocks. The visible labels must use only the
+paper-level MEMARENA dimensions:
+
+  D1 Cloze Fidelity
+  D2 Metadata Completeness
+  D3 Factual QA
+  D4 Cross-Session Reasoning
+  D5 Abstention
+  D6 Permission-Aware Access
+
+Do NOT show internal MASim task IDs, deprecated IDs, code-path IDs, or
+implementation-specific dimension labels anywhere in the figure.
+
+# Overall Layout
+
+Three large rounded rectangles arranged left to right:
+
+  A. World State Construction
+  B. Activity-Dense Co-Simulation
+  C. Co-Generated Benchmark Artifacts
+
+Above the blocks, add a thin header:
+  "15 simulated days"
+with small ticks "Day 1 ... Day 15".
+
+At the bottom, add a thin looping arrow:
+  "day boundary: commit memory"
+looping from the end of Block B back into the next simulated day.
+
+Footer, italic, centered:
+  "Dialogue corpus and evaluation instances are co-produced from logged simulation state -- no post-hoc annotation."
+
+# Block A -- World State Construction
+
+Title:
+  "World State Construction"
+Subtitle:
+  "social graph, personas, schedules, visibility"
+
+Inside Block A, draw four compact components:
+
+1. "Dunbar-layered social graph"
+   - About 8 circular nodes.
+   - Edge thickness indicates relationship strength.
+   - Highlight one node with a thin outline labelled "ego".
+
+2. "Persona cards"
+   - Small stacked cards with short rows:
+     "roles", "groups", "locations", "public-info tiers".
+   - Include a tiny RIASEC-style six-bar personality icon, but do not
+     over-label it.
+
+3. "Daily schedules"
+   - A simple 24-hour timeline with a few activity blocks.
+   - Label: "activity logs".
+
+4. "Visibility matrix"
+   - Rows are users; columns are world events.
+   - Some cells filled and some empty.
+   - Label: "who can observe what".
+
+Small note at the bottom of Block A:
+  "one coherent world with partial observability"
+
+# Block B -- Activity-Dense Co-Simulation
+
+Title:
+  "Activity-Dense Co-Simulation"
+Subtitle:
+  "sessions, memory probes, and generation hooks"
+
+Block B must have two intertwined lanes, not two independent pipelines.
+
+Upper lane title:
+  "conversation corpus"
+
+Show several small chat-session cards:
+  - person-person session
+  - user-assistant activity narration
+  - user-assistant memory reflection
+  - assistant-initiated memory probe
+
+Use very short sample text inside chat bubbles. Keep every bubble under
+six words. Example fragments:
+  "How did the appointment go?"
+  "Alice moved it to Friday."
+  "Remember last week's plan?"
+  "What did Bob tell you?"
+
+Lower lane title:
+  "generation hooks"
+
+Draw small chips connected by dotted lines to the chat-session cards:
+  - conflict hook
+  - coreference tracker
+  - permission hook
+  - autonomous privacy hook
+  - unsupported-claim hook
+  - memory-probe selector
+
+These are hooks, not final paper dimensions. Do not attach D-number labels
+to the hooks.
+
+Add a compact card:
+  "per-session extraction"
+with small badges:
+  "facts", "feelings", "speaker", "timestamp", "participants",
+  "location", "source session".
+
+Draw arrows from chat cards and hooks into this extraction card, showing
+that provenance is captured while the corpus is generated.
+
+# Block C -- Co-Generated Benchmark Artifacts
+
+Title:
+  "Co-Generated Benchmark Artifacts"
+Subtitle:
+  "questions, gold labels, ego views"
+
+This is the most important block. It should visually answer:
+  "How are the questions generated?"
+
+At the top, draw a central database-like object:
+  "logged simulation state"
+
+Small tags attached to it:
+  "sessions", "turns", "events", "visibility masks", "timestamps",
+  "source-session IDs".
+
+From this object, draw arrows to a large box:
+  "GT + Question Builder"
+
+Inside this builder, show two rows.
+
+Row 1 title:
+  "simulation-derived families"
+Badges:
+  "D1 Cloze Fidelity"
+  "D2 Metadata Completeness"
+  "D4 Cross-Session Reasoning"
+  "D5 Abstention"
+  "D6 Permission-Aware Access"
+
+Row 2 title:
+  "LLM-generated, provenance-constrained"
+Badge:
+  "D3 Factual QA"
+Small sub-badges:
+  "standard", "temporal", "counterfactual"
+
+Next to the builder, draw a smaller box:
+  "Query Hardener"
+List only:
+  "paraphrase"
+  "temporal rewrite"
+  "distractor / negation"
+  "perspective scoping"
+  "counterfactual probe"
+
+Add tiny text under "Query Hardener":
+  "preserves evidence-session provenance"
+
+Then draw arrows into:
+  "Ego Projection"
+with the formula:
+  "pi(u_i, D)"
+
+Under it:
+  "retain only sessions visible to the queried ego"
+
+Final outputs at the far right:
+
+1. "ego transcript"
+   - Stack-of-documents icon.
+   - Label: "one per user".
+
+2. "oracle evidence view"
+   - Smaller stack.
+   - Label: "evidence sessions only".
+
+3. "eval instances"
+   - Database cylinder.
+   - Label:
+     "1,579 questions, D1-D6"
+   - Small field list:
+     "query + gold + ego_agent_id + evidence_session_ids + context_tier + expected action"
+
+# Visual Constraints
+
+- Stage C must not look like a downstream manual annotation stage.
+- Use shared arrows, dotted provenance lines, or intertwined lanes to show
+  that corpus generation and evaluation-instance generation depend on the
+  same logged simulation state.
+- Keep visible text short and consistent with the paper.
+- Do not include implementation filenames, Python class names, code IDs, or
+  internal task IDs in the figure.
+- Do not write any internal task ID or deprecated dimension label.
+- Distinguish all categories in grayscale print.
+- Ensure all text remains legible at full NeurIPS text width.
+
+# Avoid
+
+Charts, axes, scatter plots, photorealistic people, brand logos, emoji,
+watermarks, saturated colors, purple gradients, glass effects, decorative
+ornaments, dense paragraphs, and any label that exposes internal MASim
+task IDs.

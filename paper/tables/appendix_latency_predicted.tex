@@ -1,0 +1,19 @@
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Single-stream end-to-end latency $T_{\text{total}}$ on Spark GB10 (ms, p50, \texttt{concurrency=1}). \emph{Roman}: measured cell median (answer-time median plus $T_{\text{search}}$ from Table~\ref{tab:appendix-latency-fit}'s search row). \emph{Italic with $\dagger$}: predicted by composing the per-reader fit (Table~\ref{tab:appendix-latency-fit}) with the \texttt{0\_6b}-measured prompt-length distribution and the backend's $T_{\text{search}}$, where we have not run the cell directly (\S\ref{app:lat:extrapolation}). \texttt{n/a} marks cells with no fit available (Mistral-7B; see \S\ref{app:lat:caveats}).}
+\label{tab:appendix-latency-predicted}
+\begin{tabular}{lrrrrr}
+\toprule
+Reader & Vanilla & Oracle & RAG & Memobase & MemSearch \\
+\midrule
+Qwen3-0.6B & 381 & 279 & 716 & 464 & 890 \\
+Llama-3.2-3B & 1215 & 1170 & 1730 & \textit{1800}$^\dagger$ & \textit{2847}$^\dagger$ \\
+Mistral-7B-Inst.\ v0.3 & \texttt{n/a} & \texttt{n/a} & \texttt{n/a} & \texttt{n/a} & \texttt{n/a} \\
+Qwen3-8B & 2382 & 2486 & 4748 & \textit{3620}$^\dagger$ & \textit{5729}$^\dagger$ \\
+Qwen3-32B-AWQ & 5365 & 4380 & 7250 & \textit{5018}$^\dagger$ & \textit{9121}$^\dagger$ \\
+\midrule
+$T_{\text{search}}$ (ms, p50) & 0 & 0 & 87 & 7 & 48 \\
+\bottomrule
+\end{tabular}
+\end{table}

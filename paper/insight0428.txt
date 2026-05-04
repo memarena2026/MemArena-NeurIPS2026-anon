@@ -1,0 +1,201 @@
+INSIGHT 2026-04-28 — Next paper actions from docs/reviews/0428review*.txt
+============================================================================
+
+Sources:
+  docs/reviews/0428review.txt
+  docs/reviews/0428review2.txt
+
+Goal:
+  Turn the two 0428 reviewer-style passes into actionable next steps. I also
+  spot-checked the current paper for already-covered points, so this file is
+  not a full review summary; it is a TODO list for the next revision pass.
+
+Status snapshot:
+  The current draft already covers several repeated review requests: Avg is
+  explicitly non-D6; Permission-Aware Access has REFUSAL/COMPLY/NONE semantics;
+  GPU-only energy is caveated in main text; synthetic / English-only / cultural
+  norm limitations are in Discussion; MASim has appendix examples and release
+  details. The remaining work is mostly consistency cleanup, main-text
+  calibration, and related-work / limitation tightening.
+
+
+============================================================================
+P0 — Must Fix Before Next Compile
+============================================================================
+
+P0-1. Remove internal TODO / placeholder residue in the appendix.
+  Current search still finds TODO-like D6-rebuild markers and placeholder text
+  in paper/chapters/11_appendix_placeholders.tex. This is the most reviewer-
+  visible cleanup risk because the reviews specifically care about D6 scoring,
+  permission rubric clarity, and reproducibility. Replace TODO blocks with final
+  text or delete them.
+
+P0-2. Fix bootstrap-count inconsistency.
+  Main experimental setup says cluster bootstrap uses B=2000 resamples; appendix
+  release/protocol bullet says 1000. Audit the actual script/config and make all
+  mentions match. This directly affects statistical credibility.
+
+P0-3. Final pass for claim scope.
+  The reviews are positive but sensitive to overclaiming. Search the full draft
+  for "first", "only", "no current", "state-of-the-art", "solves", "proves",
+  and "rules out". Keep claims only when literally supported by our evaluated
+  setting; otherwise change to "evaluated", "in our experiments", "suggests",
+  or "is consistent with".
+
+P0-4. Check all references mentioned in text compile and point to real bib keys.
+  High-priority names from the reviews: PersonaMem / PersonaMem-v2, MemoryBench,
+  ATM-Bench, Chronos, SECOM, Memora, LoCoMo, LongMemEval, BEAM, EverMemBench,
+  MemGallery. Some are already present; Chronos and SECOM need explicit audit.
+
+P0-5. Rebuild and inspect the generated PDF manually.
+  After the cleanup pass, compile preprint and inspect the pages around Abstract,
+  Introduction, Table 2, Figure 3, Finding 1-3, Discussion, and the appendix
+  D6/reproducibility sections. The target is no internal notes, no stale labels,
+  no confusing D1/D2-style shorthand in the main body.
+
+
+============================================================================
+P1 — High-Value Text Improvements
+============================================================================
+
+P1-1. Add or tighten one main-text sentence explaining MASim realism limits.
+  Reviews repeatedly ask whether synthetic conversations resemble real human
+  dialogue. We already have an appendix exemplar and limitations. The main text
+  should briefly say MASim is evaluation-aware and synthetic, not a claim of
+  full ecological realism; appendix examples and corpus statistics support
+  inspection.
+
+P1-2. Make memory-probe density less suspicious.
+  0428review2 explicitly notes that MASim memory probes may bias the corpus
+  toward memory-heavy tasks. Discussion currently mentions dense memory-probe
+  distribution. Strengthen this with one clear sentence: memory probes are part
+  of the benchmark stress design, but system rankings may depend on this density.
+
+P1-3. Surface D6 scenario composition more concretely.
+  The reviewer asks for explicit-rule / autonomous / identity / contextual
+  categories and DENY/ALLOW balance. Appendix seems to have a scenario-family
+  breakdown; add a compact main-text pointer or one phrase in Section 5/7 so
+  readers do not need to hunt through appendix.
+
+P1-4. Add a short D6 example in main text only if space allows.
+  The appendix examples are useful. A one-sentence example near the D6 scoring
+  paragraph could reduce ambiguity around REFUSAL vs NONE vs COMPLY. Do not add
+  a long protocol block; integrate it naturally.
+
+P1-5. Related work: explicitly position against Chronos and SECOM if citations
+  are available.
+  0428review2 asks for temporally structured memory systems and segment-level
+  memory management. We do not need to run them, but we should state that they
+  are complementary architectures and that MEMARENA is an evaluation substrate
+  stressing ego visibility, daily density, and permission semantics.
+
+P1-6. Related work: keep MemoryBench / ATM-Bench / PersonaMem comparison tight.
+  0428review asks for these recent benchmarks. The draft already cites several;
+  ensure the comparison is not just name-dropping. One concise contrast is enough:
+  they evaluate continual learning / personal memory / partial observability,
+  while MEMARENA combines ego projection, coherent single-world dialogue, daily
+  load, and permission-aware scoring.
+
+P1-7. Broader Impact: add two missing risk angles if page budget allows.
+  The current privacy paragraph is good. Add concise mentions of device theft or
+  malicious local apps as local-memory risks, and the positive environmental /
+  energy implication of smaller readers. Keep it short.
+
+P1-8. Energy claim: keep the caveat attached to the headline.
+  Main text already says GPU-only and CPU/DRAM/I/O excluded; do not let Abstract
+  or Finding 3 read like end-to-end device energy. If needed, add "answer-time
+  GPU energy" consistently and reserve "lifecycle energy" for the amortized
+  calculation with K threshold.
+
+P1-9. Amortization threshold: make low-query regimes explicit.
+  Reviewers notice K≈5k queries/ego may be high for some assistants. Current
+  text says below threshold it is a capability argument. Ensure Discussion or
+  Finding 3 keeps this caveat visible.
+
+P1-10. Clarify "Avg" in every place where readers may infer safety.
+  Current Section 5 and Table 4 lead-in are good. Check Abstract, Intro, and
+  Finding 3: any phrase like "better overall" should not imply D6 privacy safety.
+
+P1-11. D6 sample-size caveat.
+  Discussion already says 200 items per seed and fine breakdowns exploratory.
+  Verify that this caveat is near enough to the D6 claims, not only buried late.
+
+P1-12. BGE-M3 / dense retrieval configuration details.
+  Reviewers ask for exact dense-retrieval setup and whether hybrid lexical+dense
+  was tried. If appendix already has the config, make sure the reference is easy
+  to find. If not, add embedding/pooling/index/top-k details.
+
+P1-13. Ensure MASim release/reproducibility bullets are internally consistent.
+  The appendix release checklist is strong, but verify all paths are real and
+  all promised assets exist or are clearly "upon acceptance": MASim pipeline,
+  eval framework, prompts, seeds, server params, Croissant metadata, licenses.
+
+
+============================================================================
+P2 — Optional Experiments or Rebuttal-Only Scope Statements
+============================================================================
+
+P2-1. Do not add new retrieval baselines unless we have a clean implementation.
+  Reviews mention hybrid lexical+dense, learned term weighting, multi-vector
+  retrievers, Chronos-style temporal filters, and SECOM-style segments. For the
+  paper, a limitation/future-work statement is safer than a rushed baseline.
+
+P2-2. Do not run end-to-end CPU/DRAM/I/O energy unless measurement is reliable.
+  Reviewers ask for end-to-end device energy. Our honest position is GPU-only
+  NVML with explicit caveat. A weak estimate would create more attack surface.
+
+P2-3. Expanded D6 human calibration subset is valuable but not required.
+  The paper already promises release/future work. If time permits, add a small
+  human-labeled subset; otherwise keep the limitation clear.
+
+P2-4. Closed-model reader or extractor upper bound is optional.
+  Reviews ask whether local readers are simply weak. We already have closed-API
+  extractor ceiling in appendix for structured memory. A closed-model reader
+  upper bound would be useful but is not necessary for the on-device framing.
+
+P2-5. Reduced memory-probe-density MASim run is optional and expensive.
+  This would directly answer probe-density concerns, but it is a simulator-side
+  experiment. Unless we can run it cleanly, treat as limitation/future work.
+
+P2-6. Larger D6 pool or per-scenario D6 expansion is optional.
+  Helpful for final release, but not essential if we clearly mark fine-grained
+  D6 family analysis as exploratory.
+
+
+============================================================================
+Reviewer-Risk Map
+============================================================================
+
+Risk A: "Synthetic English-only data may not generalize."
+  Response: explicitly acknowledge; appendix examples and corpus statistics
+  support inspectability; future work multilingual / real-world calibration.
+
+Risk B: "Silence is not privacy depends on D6 scoring."
+  Response: keep REFUSAL/COMPLY/NONE definitions concrete; surface one example;
+  remove D6 TODO residue; keep sample-size caveat.
+
+Risk C: "Retrieval is not enough ignores stronger retrievers."
+  Response: cite dense, reranker, summarization, HippoRAG ablations; state this
+  is not an exhaustive retrieval-system claim; mention hybrid/temporal/segment
+  retrievers as future backends.
+
+Risk D: "Energy advantage is not end-to-end."
+  Response: always say answer-time GPU energy; explicitly exclude CPU/DRAM/I/O;
+  keep K threshold and low-query caveat visible.
+
+Risk E: "Reproducibility depends on unreleased MASim."
+  Response: release plan must be precise and internally consistent; include
+  prompts, seeds, hyperparameters, server params, data licenses, Croissant.
+
+
+============================================================================
+Recommended Next Editing Order
+============================================================================
+
+1. Clean appendix TODO / D6 placeholder residue.
+2. Fix bootstrap B inconsistency and any other numeric/protocol mismatch.
+3. Add Chronos/SECOM related-work sentence if citations are available.
+4. Tighten D6 main-text explanation: scenario composition + one example/pointer.
+5. Polish Discussion/Broader Impact for probe-density, device theft, energy caveat.
+6. Run full claim-scope grep for overclaiming words.
+7. Compile preprint and inspect the affected pages manually.

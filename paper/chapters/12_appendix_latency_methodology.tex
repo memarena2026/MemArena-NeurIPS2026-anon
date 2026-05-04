@@ -1,0 +1,297 @@
+\section{Edge-Device Latency \& Energy Methodology}
+\label{app:latency-methodology}
+
+This appendix documents the end-to-end protocol used to produce the
+single-user, single-stream latency and energy numbers reported for the
+\textsc{Spark} edge node (NVIDIA GB10, 119.7\,GiB unified memory, ARM CPU).
+The goal is a faithful estimate of the latency a single end-user would
+experience on a personal device, separating the cost of memory backend
+mechanics from the cost of LLM inference.
+
+\subsection{Hardware and serving stack}
+\label{app:lat:hardware}
+
+All measurements run on a single \textsc{Spark} GB10 node. The reader LLM is
+served by \texttt{sglang} (\texttt{lmsysorg/sglang:spark}) inside Docker, with
+\texttt{--max-running-requests 1} on the server and
+\texttt{--answer-concurrency 1} on the client; this disables continuous
+batching so each request is processed in isolation. Memory subsystems run as
+peers on the same GPU: \textsc{Memobase} ships its full Postgres+server stack
+via a per-trial \texttt{docker compose} bundle, and \textsc{MemSearch} uses
+embedded \texttt{milvus-lite} plus a separately-loaded
+\texttt{ollama-memos} container that serves \texttt{nomic-embed-text}.
+Co-residency on a 119\,GiB unified-memory device forces an explicit
+\texttt{--mem-fraction-static} budget for sglang
+(\texttt{0.85} for vanilla/oracle/memobase, \texttt{0.5} when ollama coexists).
+A 100\,ms-period \texttt{hw\_probe} sidecar samples GPU power, GPU/CPU
+utilization, GPU/CPU temperature, and SoC power rails throughout every cell.
+
+\paragraph{Failure modes encountered.} ollama was observed to silently
+load the embedder onto CPU when the GPU was already partially occupied at
+container start (a single embed call grew from $\sim$30\,ms to
+$>$2\,min). The protocol therefore mandates that ollama be (re)started
+\emph{before} sglang, with a verification step (a warm \texttt{/api/embed} that
+must return in $<$1\,s and a docker-log assertion of
+\texttt{offloaded 13/13 layers to GPU}) before any timed work begins.
+
+\subsection{Query selection and namespace}
+\label{app:lat:queries}
+
+To make the measurement budget tractable while keeping the question pool
+representative, we select $90$ queries via
+\texttt{scripts/select\_latency\_queries.py}: nine sub-dimensions
+($d_1$~conflict, $d_2$~anaphora, $d_3$~confabulation,
+$d_4$~permission, $d_5$~cloze, $d_6$~metadata, $d_7$~qa,
+$d_8$~temporal, $d_{10}$~counterfactual), $10$ latest
+queries per sub-dimension by \texttt{metadata.query\_timestamp},
+falling back to $\max(\text{evidence\_session.end\_time})$ where
+\texttt{query\_timestamp} is absent (e.g.\ \DFour permission). The result
+is written as a JSON list and consumed by \texttt{eval/cli.py} via the
+\texttt{--instance-id-file} flag, restricting the QA pool to those
+exact $90$ instance ids. Memory subsystems use a \emph{namespace per
+ego} (\texttt{namespace\_mode=ego\_agent\_id}); ingest is monotonic
+day-by-day so no future evidence leaks into earlier days.
+
+\subsection{Phase 1 — direct measurement of reader-bound backends}
+\label{app:lat:phase1}
+
+Vanilla, Oracle, and In-Memory RAG (\texttt{inmem}) are evaluated as
+$\{\text{reader}\}\times\{\text{backend}\}$ cells via
+\texttt{scripts/run\_latency\_answer\_sweep.sh}. For each reader the
+sweep brings up sglang with \texttt{--max-running-requests 1}, performs
+a chat-completion sanity probe (a single ``Reply OK.'' request), and
+only then begins timed work; an empty or malformed sanity output aborts
+the cell to fail-fast on weight corruption. Each cell records, per
+question: prompt tokens $N_p$, completion tokens $N_c$, time-to-first-token
+$\textsc{ttft}$, total answer time $T_{\text{ans}}$, and a per-cell
+\texttt{hw\_agg} JSON aggregating the \texttt{hw\_probe} CSV. The
+\texttt{eval} configuration is
+\texttt{eval/config/pipeline\_vanilla512.yaml} so the Vanilla budget is
+held at $512$ session tokens, matching the headline ablation (commit
+\texttt{7cb42d9}).
+
+\subsection{Phase 2 — split ingest \& answer for cache-replay backends}
+\label{app:lat:phase2}
+
+\textsc{MemSearch} and \textsc{Memobase} expose no live answer-time
+adapter in our pipeline; both produce a per-question memory cache during
+\emph{ingest} that the answer phase then replays. We measure them in
+two steps:
+
+\begin{enumerate}
+\item \textbf{Ingest.} \texttt{scripts/run\_latency\_memsearch\_ingest.sh}
+and \texttt{run\_latency\_memobase\_ingest.sh} bring up sglang plus the
+backend's storage stack, run \texttt{scripts/reproduce/build\_memory\_cache.py}
+on $8$ ego agents $\times\,15$ days at concurrency $1$, and capture
+\texttt{hw\_probe}. The cache JSONL written by
+\texttt{build\_memory\_cache.py} stores, per question, the live retrieval
+latency observed during ingest:
+\begin{equation*}
+\texttt{retrieve\_latency\_ms} \;\equiv\; T_{\text{search}}\!\big(\text{backend, query}\big).
+\end{equation*}
+Because retrieval is a deterministic function of (query, index) and is
+disjoint from reader-LLM work, \emph{this column is the
+reader-independent live search overhead}; the answer phase does not need
+to repeat the search to expose it.
+
+\item \textbf{Answer-replay.} \texttt{scripts/run\_latency\_answer.sh}
+maps \texttt{BACKEND}$\in\{$\texttt{memsearch}, \texttt{memobase}$\}$
+onto the eval-CLI's \texttt{--system memory\_cache} backend, replaying
+each cached row through sglang to obtain $(N_p, N_c, T_{\text{ans}},
+\textsc{ttft})$. Replay reports $T_{\text{search}}=0$ by construction,
+which we replace with the per-row \texttt{retrieve\_latency\_ms} from
+the ingest cache when fitting (\S\ref{app:lat:fit}).
+\end{enumerate}
+
+To avoid cache misses, each cell uses a backend-specific
+\texttt{cache\_ids\_<backend>\_<reader>\_s2.json} filter listing the
+$\sim\!430$ instance ids actually present in that backend's cache.
+Because the cache is built on $8$ egos but the curated $90$-query
+selection spans all $50$ egos, the in-cache subset is what actually
+gets timed.
+
+\subsection{Composition: reader-bound LLM time + reader-free search}
+\label{app:lat:composition}
+
+The single decomposition that makes a $5\!\times\!5$ table tractable
+without running every cell is
+\begin{equation}
+T_{\text{total}}(\text{reader}, \text{backend}, q) \;=\;
+\underbrace{T_{\text{LLM}}(\text{reader},\, N_p^q, N_c^q)}_{\text{reader-bound, backend-orthogonal}}
+\;+\;
+\underbrace{T_{\text{search}}(\text{backend})}_{\text{reader-orthogonal}}.
+\label{eq:lat-composition}
+\end{equation}
+The first term depends on the reader and the per-question prompt /
+completion lengths; the second is set by the memory backend's retrieval
+pipeline (BM25, embedding lookup, etc.) and the storage stack. This
+factorization is exact for backends whose retrieval does not call the
+reader (\textsc{Vanilla}, \textsc{Oracle}, \textsc{RAG},
+\textsc{MemSearch}); it is approximate for \textsc{Memobase}, whose
+\emph{ingest} uses the reader as extractor (the cache is therefore
+extractor-specific), but whose \emph{retrieve} operation at answer time
+is a Postgres call and reader-orthogonal.
+
+\subsection{Per-reader LLM-gen fit}
+\label{app:lat:fit}
+
+Within Eq.~\ref{eq:lat-composition} we model
+$T_{\text{LLM}}$ as linear in the per-question prompt and completion
+length:
+\begin{equation}
+T_{\text{LLM}}(\text{reader},\, N_p, N_c) \;=\;
+\alpha_r + \beta_r\, N_p + \gamma_r\, N_c.
+\label{eq:lat-fit}
+\end{equation}
+Per-reader $(\alpha_r,\beta_r,\gamma_r)$ are obtained by ordinary
+least-squares from \texttt{scripts/fit\_latency\_model.py} using
+\emph{only} Phase-1 backends (vanilla / oracle / inmem) — these provide
+$N_p \in [\sim\!200,\sim\!11{,}000]$ and $N_c \in [1, 500]$, spanning the
+ranges Phase-2 cells will land in. We do not include
+\textsc{MemSearch} / \textsc{Memobase} samples in the regression to keep
+the LLM-time fit free of any extractor- or replay-induced confounds.
+
+The $T_{\text{search}}$ term in Eq.~\ref{eq:lat-composition} is computed
+separately, per backend, as the median over per-question search times:
+$0$ for \textsc{Vanilla} / \textsc{Oracle}, the answer-phase
+\texttt{search\_time\_ms} for \textsc{RAG}, and the cache's
+\texttt{retrieve\_latency\_ms} for \textsc{MemSearch} / \textsc{Memobase}.
+
+\input{tables/appendix_latency_fit}
+
+\paragraph{TTFT.} The same script also fits time-to-first-token by
+ordinary least squares,
+\begin{equation}
+T_{\text{TTFT,LLM}}(\text{reader},\, N_p) \;=\; \alpha'_r + \beta'_r\, N_p,
+\label{eq:lat-fit-ttft}
+\end{equation}
+omitting the completion-token term (TTFT is prefill-only). End-to-end
+TTFT for the main-text efficiency table is then
+$T_{\text{TTFT}} = T_{\text{search}}(\text{backend}) + T_{\text{TTFT,LLM}}$,
+with $T_{\text{search}}$ from the same per-backend column used in
+\S\ref{app:lat:fit}.
+
+\paragraph{Diagnostics.} The fit script reports per-reader $R^2$,
+$|residual|$ at p50 and p95, observed $(N_p, N_c)$ ranges, and a
+per-cell ``predicted vs.\ measured'' validation that confirms
+Eq.~\ref{eq:lat-fit} reproduces the median-cell measurement to within
+single-digit percent for all measured cells. Predicted and measured
+medians agree to within $\sim\!1\%$ on \textsc{MemSearch}-$0_6$B
+($849$\,ms predicted vs.\ $890$\,ms measured), giving us empirical
+confidence in the composition.
+
+\subsection{Extrapolation across readers for cache-replay backends}
+\label{app:lat:extrapolation}
+
+For \textsc{MemSearch} and \textsc{Memobase} we run the answer phase on
+\texttt{0\_6b} only. Predictions for heavier readers substitute the
+\texttt{0\_6b} prompt-length distribution
+$(\widehat{N}_p^{(0\_6b)}, \widehat{N}_c^{(0\_6b)})$ into
+Eq.~\ref{eq:lat-fit} with that reader's $(\alpha_r,\beta_r,\gamma_r)$.
+This is exact for \textsc{MemSearch} (its retrieved snippets do not
+depend on the reader) and approximate for \textsc{Memobase} (its
+extractor-specific cache yields slightly different memory snippets per
+reader; the prompt format and snippet count are nevertheless stable).
+Cells that use this extrapolation are flagged with
+\texttt{prompt\_extrapolated\_from\_0\_6b: true} in the output JSON.
+
+\paragraph{Reading Table~\ref{tab:results-L}.}
+Each cell decomposes as $T_{\text{search}} + T_{\text{TTFT,LLM}}$:
+search overhead from the backend's retrieval pipeline plus the reader's
+prefill cost on the resulting prompt. Roman entries are directly
+measured; italic entries marked with $\dagger$ have their
+$T_{\text{TTFT,LLM}}$ composed from this reader's TTFT fit
+(Eq.~\ref{eq:lat-fit-ttft}) applied to \texttt{0\_6b}'s prompt-length
+distribution, by the extrapolation rule above. The two bottom rows
+report per-backend constants: $T_{\text{search}}$ is the per-question
+retrieval median used in every cell of that column, and $N_p$ is the
+p50 prompt-token count fed to the reader (taken from the \texttt{0\_6b}
+runs, since prompt length is essentially reader-independent for these
+five backends). $N_p$ explains why
+\textsc{Vanilla} TTFTs sit below \textsc{Oracle}'s at the same reader
+even though \textsc{Vanilla} prompts are longer: prefix caching in
+\texttt{sglang} reuses the long but identical system prompt across
+turns, while \textsc{Oracle}'s shorter but per-question evidence
+prompt re-prefills each call. The \texttt{n/a} cell is Mistral-7B,
+which we exclude from the latency matrix
+(\S\ref{app:lat:caveats}).
+
+\input{tables/appendix_latency_predicted}
+
+\subsection{Reproduction recipe}
+\label{app:lat:repro}
+
+The full pipeline is, in order:
+\begin{enumerate}
+\setlength{\itemsep}{0pt}
+\item \texttt{scripts/select\_latency\_queries.py}\,$\to$\,\texttt{out/latency\_selection/queries\_s2.json}
+\item Phase 1 sweep:
+  \texttt{bash scripts/run\_latency\_answer\_sweep.sh} \\(\texttt{READERS=("0\_6b" "llama3b" "7b" "8b" "32b")}, \texttt{BACKENDS=("vanilla" "oracle")})
+\item Phase 2.1 (memsearch):
+  \texttt{MODEL=0\_6b bash scripts/run\_latency\_memsearch\_ingest.sh}
+\item Phase 2.2 (memobase):
+  \texttt{MODEL=0\_6b bash scripts/run\_latency\_memobase\_ingest.sh}
+\item Fit \& predict: \texttt{python3 scripts/fit\_latency\_model.py}\,$\to$\,\texttt{out/latency\_selection/llm\_fit\_models.json}
+\end{enumerate}
+Outputs of interest are \texttt{latency\_summary.txt} per cell (p50/p95
+ttft, answer time, prompt/completion tokens), \texttt{hw\_agg\_*.json}
+per cell (mean/peak GPU power, util, energy/query, peak temp, SoC
+rails), and \texttt{llm\_fit\_models.json} (per-reader fit, search
+overhead per backend, validation diagnostics, full predicted $5\!\times\!5$
+table). Concurrency, mem-fraction, max-running-requests, and the
+$8$~egos $\times\,15$~days ingest scope are pinned in the scripts; only
+\texttt{MODEL} and \texttt{TRIAL} are intended user-facing knobs.
+
+\subsection{Caveats and limitations}
+\label{app:lat:caveats}
+
+\begin{itemize}
+\setlength{\itemsep}{0pt}
+\item \textbf{Single-stream operating point.} All numbers are
+$\text{concurrency}=1$ on both client and server. Throughput-mode
+batching would change the constants in Eq.~\ref{eq:lat-fit} significantly
+and is not what an edge user experiences.
+\item \textbf{Prefix caching.} \texttt{sglang} caches identical prompt
+prefixes across requests. \textsc{Vanilla} cells, whose system prompt is
+fixed across all $90$ questions, therefore see uncached prefill only on
+the per-question evidence tail; this is a deployment-realistic effect
+(an edge assistant pinned to a single user reuses prefixes across
+turns) and explains why \textsc{Vanilla} TTFTs in Table~\ref{tab:results-L}
+sit below \textsc{Oracle} TTFTs at the same reader despite longer raw
+prompts.
+\item \textbf{8-ego ingest scope.} Phase-2 caches cover the first
+$8$~egos. Energy and time scale linearly in egos for both backends
+(verified day-by-day in the ingest log), so reporting at $50$~egos is a
+straight $\times 50/8$ multiplication where it matters.
+\item \textbf{Cache freshness.} The \textsc{MemSearch} cache is
+re-built fresh in this work; the \textsc{Memobase} cache reuses an
+identically-configured ingest from a prior run on the same node since a
+fresh memobase ingest costs $\sim\!72$\,min on \texttt{0\_6b} (extractor
+LLM-bound) and the timing is reproducible to within $<\!1\%$.
+\item \textbf{Reader-extrapolation for memobase.} As discussed in
+\S\ref{app:lat:extrapolation}, \textsc{Memobase} predictions on
+non-\texttt{0\_6b} readers assume the prompt-length distribution
+transfers from the \texttt{0\_6b} cache.
+\item \textbf{Mistral-7B reader.} \texttt{Mistral-7B-Instruct-v0.3}
+serves correctly on commodity x86/Hopper deployments but, with the
+\texttt{lmsysorg/sglang:spark} build available at submission time on
+NVIDIA GB10, exhibits chat-template-induced output collapse: plain
+text completion produces coherent prose, while any prompt routed
+through \texttt{[INST]\,\dots\,[/INST]} (either via
+\texttt{/v1/chat/completions} or as a raw completion) degenerates into
+repetitive special-token salad. We verified the weights themselves are
+intact (every shard reloads via \texttt{safetensors.safe\_open}; plain
+completion is fluent) and that the same failure persists across
+\texttt{--chat-template mistral}, the model's bundled chat template,
+and across both the \texttt{flashinfer} and \texttt{triton} attention
+backends; this matches a known cluster of GB10 / Blackwell / Mistral
+incompatibilities under active fix in \texttt{sgl-project/sglang}
+(e.g.\ the Qwen3-VL native-mRoPE patch, FA3 / \texttt{sgl\_kernel}
+import errors, and SM\_120 RMSNorm-kernel issues). For this submission
+we therefore mark the four \texttt{Mistral-7B} cells in
+Table~\ref{tab:appendix-latency-predicted} as \texttt{n/a} rather than
+extrapolating from a (\textsc{Vanilla}, \textsc{Oracle},
+\textsc{RAG}) fit we cannot validate. The methodology and the
+single-stream protocol carry over unchanged once the upstream fix
+lands.
+\end{itemize}

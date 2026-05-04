@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Released \benchL dataset statistics. Corpus tokens are counted over each dialog turn's \texttt{text} field with the \texttt{Qwen/Qwen3-8B} tokenizer. Ego-observed tokens sum the sessions in \texttt{ego\_session\_map} for each of the 50 human agents, so a shared conversation contributes to each participant's personal history.}
+\label{tab:dataset-summary}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Statistic & Value \\
+\midrule
+Agents / simulated days & 50 / 15 \\
+Sessions / turns & 13,343 / 137,279 \\
+Corpus tokens / whitespace words & 10,305,361 / 7,938,983 \\
+Mean turns per session & 10.29 \\
+Mean tokens per session & 772.3 \\
+Session token range & 91--3,007 \\
+Ego sessions per agent, mean [min, max] & 401.1 [332, 543] \\
+Ego turns per agent, mean [min, max] & 4,186.4 [3,488, 5,669] \\
+Ego-observed tokens per agent, mean [min, max] & 361,630 [253,109, 521,812] \\
+Ego-observed tokens per agent per day, mean [min, max] & 24,109 [16,874, 34,787] \\
+$2\times$ corpus tokens / 50-agent rough estimate & 412,214 \\
+Evaluated instances & 1,579 \\
+\bottomrule
+\end{tabular}
+\end{table}

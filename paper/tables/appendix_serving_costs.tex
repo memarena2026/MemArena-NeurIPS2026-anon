@@ -1,0 +1,36 @@
+\begin{table}[t]
+\centering
+\caption{Per-cell serving costs on \benchL (s1 trial seed, Spark probes, $N{=}250$ unique answer queries for \texttt{vanilla}/\texttt{oracle}/\texttt{inmem} and $N{=}1{,}579$ replayed queries for \texttt{memobase}/\texttt{memos}). Token, latency, and search-time columns are per-row medians across rows whose \texttt{timing\_reliable} flag is not explicitly false; \texttt{vanilla}/\texttt{oracle} populate the flag (all rows true), the structured-memory pipelines do not. Decode throughput is the per-row median of $\textsc{ct}\cdot{}1000/(\textsc{at}{-}\textsc{ttft})$. \textbf{J/q is the cell mean rather than the median}: per-query energy on the smallest readers (Q$0.6$B, Llama-$3.2$-$3$B) sits below the GPU power-probe noise floor on a majority of individual queries, so the median collapses to $0.0$ even though the cumulative energy is non-zero; we report the mean to keep the column comparable across reader scales and to match the $0.56$~J/q figure cited in the abstract / Finding~3. Search time was not separately instrumented in the answer logs (em-dash for non-search backends, \texttt{0.0} reported when the field is present but always zero). Energy and peak temperature come from per-cell hardware aggregates (\texttt{*\_answerB} files for structured-memory cells).}
+\label{tab:appendix-serving-costs}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llrrrrrrrr@{}}
+\toprule
+Reader & Backend & $n_q$ & prompt tok & comp.\ tok & TTFT (ms) & decode (tok/s) & search (ms) & J/q & peak $^\circ$C \\
+\midrule
+\multirow{5}{*}{Qwen3-0.6B} & \texttt{vanilla} & 250 & 4758 & 24 & 70.2 & 74.7 & \textemdash & 13.4 & 61 \\
+ & \texttt{inmem} & 250 & 515 & 44 & 28.9 & 88.8 & 0.0 & 10.3 & 57 \\
+ & \texttt{oracle} & 250 & 1829 & 22 & 95.2 & 68.0 & \textemdash & 20.7 & 63 \\
+ & \texttt{memobase} & 1579 & 1514 & 24 & 33.6 & 115.9 & n/a & 0.6 & 55 \\
+ & \texttt{memos} & 1579 & 1514 & 24 & 33.3 & 116.1 & n/a & 1.9 & 60 \\
+\midrule
+\multirow{5}{*}{Llama-3.2-3B} & \texttt{vanilla} & 250 & 4760 & 17 & 127.0 & 27.4 & \textemdash & 62.2 & 69 \\
+ & \texttt{inmem} & 250 & 533 & 19 & 81.7 & 27.2 & 0.0 & 37.1 & 67 \\
+ & \texttt{oracle} & 250 & 1841 & 30 & 262.0 & 22.6 & \textemdash & 120.4 & 78 \\
+ & \texttt{memobase} & n/a & n/a & n/a & n/a & n/a & n/a & 22.3 & 78 \\
+ & \texttt{memos} & 1579 & 1525 & 29 & 121.3 & 27.8 & n/a & 27.2 & 77 \\
+\midrule
+\multirow{5}{*}{Qwen3-8B} & \texttt{vanilla} & 250 & 4758 & 10 & 226.8 & 12.6 & \textemdash & 105.7 & 74 \\
+ & \texttt{inmem} & 250 & 515 & 45 & 167.4 & 13.7 & 0.0 & 150.0 & 73 \\
+ & \texttt{oracle} & 250 & 1829 & 30 & 671.8 & 10.6 & \textemdash & 261.9 & 83 \\
+ & \texttt{memobase} & 1579 & 1514 & 30 & 286.0 & 13.9 & n/a & 60.8 & 80 \\
+ & \texttt{memos} & 1579 & 1514 & 30 & 285.6 & 13.9 & n/a & 58.4 & 81 \\
+\midrule
+\multirow{5}{*}{Qwen3-32B-AWQ} & \texttt{vanilla} & 250 & 4758 & 10 & 1961.7 & 1.5 & \textemdash & 891.6 & 82 \\
+ & \texttt{inmem} & 250 & 515 & 43 & 1321.5 & 1.6 & 0.0 & 1146.3 & 73 \\
+ & \texttt{oracle} & 250 & 1829 & 34 & 3934.3 & 1.3 & \textemdash & 1810.5 & 87 \\
+ & \texttt{memobase} & 383 & 1597 & 32 & 3045.0 & 1.6 & n/a & 1795.0 & 87 \\
+ & \texttt{memos} & n/a & n/a & n/a & n/a & n/a & n/a & 809.8 & 83 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,44 @@
+\begin{table}[t]
+\centering
+\caption{\benchL{} main results: backend $\times$ reader accuracy (mean $\pm$ sample std across $n=3$ seeds; $T{=}0.3$) and end-to-end TTFT (ms, p50) on Spark GB10 at \texttt{concurrency=1}. \textbf{Bold} = row-local best mean. {\tiny\textcolor{green!55!black}{$\uparrow$}} / {\tiny\textcolor{red!70!black}{$\downarrow$}} marker on each non-Vanilla cell $=$ pp gap to row-local Vanilla (omitted when $|\Delta| < 0.1$). Italic TTFT entries with $\dagger$ are extrapolated from the \texttt{0\_6b} prompt-length distribution via Eq.~\ref{eq:lat-fit-ttft} (Appendix~\ref{app:lat:extrapolation}); Mistral-7B TTFT is not measured ($\,$--$\,$). Oracle is shown to the right of the vertical rule as a ceiling reference. Category column definitions are in \S\ref{sec:eval-method}.}
+\label{tab:results-L}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}ll c c c c | c @{}}
+\toprule
+ & & \textbf{Vanilla} & \textbf{RAG} & \textbf{Memobase} & \textbf{MemSearch} & \textbf{Oracle} \\
+\midrule
+\multirow{5}{*}{Qwen3-0.6B} & Rec. & 34.3{\scriptsize$\pm$0.7} & 44.5{\scriptsize$\pm$2.2}\,{\tiny\textcolor{green!55!black}{$\uparrow$10.2}} & 23.7{\scriptsize$\pm$1.6}\,{\tiny\textcolor{red!70!black}{$\downarrow$10.6}} & 56.2{\scriptsize$\pm$0.8}\,{\tiny\textcolor{green!55!black}{$\uparrow$21.9}} & \textbf{62.0{\scriptsize$\pm$1.0}}\,{\tiny\textcolor{green!55!black}{$\uparrow$27.7}} \\
+ & Rea. & 33.8{\scriptsize$\pm$0.3} & 36.9{\scriptsize$\pm$0.7}\,{\tiny\textcolor{green!55!black}{$\uparrow$3.1}} & 22.2{\scriptsize$\pm$2.0}\,{\tiny\textcolor{red!70!black}{$\downarrow$11.6}} & 41.4{\scriptsize$\pm$0.7}\,{\tiny\textcolor{green!55!black}{$\uparrow$7.6}} & \textbf{54.6{\scriptsize$\pm$0.6}}\,{\tiny\textcolor{green!55!black}{$\uparrow$20.8}} \\
+ & Trust. & 32.0{\scriptsize$\pm$0.9} & 12.5{\scriptsize$\pm$1.6}\,{\tiny\textcolor{red!70!black}{$\downarrow$19.5}} & 16.4{\scriptsize$\pm$2.2}\,{\tiny\textcolor{red!70!black}{$\downarrow$15.5}} & 14.1{\scriptsize$\pm$0.4}\,{\tiny\textcolor{red!70!black}{$\downarrow$17.9}} & \textbf{52.6{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$20.6}} \\
+ & Avg & 33.2{\scriptsize$\pm$0.4} & 30.5{\scriptsize$\pm$0.9}\,{\tiny\textcolor{red!70!black}{$\downarrow$2.8}} & 19.8{\scriptsize$\pm$0.6}\,{\tiny\textcolor{red!70!black}{$\downarrow$13.4}} & 36.1{\scriptsize$\pm$0.6}\,{\tiny\textcolor{green!55!black}{$\uparrow$2.9}} & \textbf{56.8{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$23.5}} \\
+ & TTFT/ms & 41 & 161 & 32 & 213 & 42 \\
+\midrule
+\multirow{5}{*}{Llama-3.2-3B} & Rec. & 34.7{\scriptsize$\pm$0.7} & 52.7{\scriptsize$\pm$0.6}\,{\tiny\textcolor{green!55!black}{$\uparrow$18.0}} & 32.4{\scriptsize$\pm$1.6}\,{\tiny\textcolor{red!70!black}{$\downarrow$2.3}} & 63.1{\scriptsize$\pm$0.9}\,{\tiny\textcolor{green!55!black}{$\uparrow$28.4}} & \textbf{71.5{\scriptsize$\pm$0.7}}\,{\tiny\textcolor{green!55!black}{$\uparrow$36.8}} \\
+ & Rea. & 28.2{\scriptsize$\pm$1.3} & 39.4{\scriptsize$\pm$1.0}\,{\tiny\textcolor{green!55!black}{$\uparrow$11.2}} & 21.3{\scriptsize$\pm$0.6}\,{\tiny\textcolor{red!70!black}{$\downarrow$6.9}} & 42.4{\scriptsize$\pm$0.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$14.2}} & \textbf{66.6{\scriptsize$\pm$0.5}}\,{\tiny\textcolor{green!55!black}{$\uparrow$38.4}} \\
+ & Trust. & 32.5{\scriptsize$\pm$0.2} & 18.8{\scriptsize$\pm$1.0}\,{\tiny\textcolor{red!70!black}{$\downarrow$13.7}} & 20.2{\scriptsize$\pm$1.2}\,{\tiny\textcolor{red!70!black}{$\downarrow$12.3}} & 20.9{\scriptsize$\pm$1.3}\,{\tiny\textcolor{red!70!black}{$\downarrow$11.6}} & \textbf{53.1{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$20.6}} \\
+ & Avg & 31.0{\scriptsize$\pm$0.4} & 35.7{\scriptsize$\pm$0.1}\,{\tiny\textcolor{green!55!black}{$\uparrow$4.7}} & 23.3{\scriptsize$\pm$1.1}\,{\tiny\textcolor{red!70!black}{$\downarrow$7.7}} & 40.4{\scriptsize$\pm$0.6}\,{\tiny\textcolor{green!55!black}{$\uparrow$9.5}} & \textbf{63.3{\scriptsize$\pm$0.2}}\,{\tiny\textcolor{green!55!black}{$\uparrow$32.3}} \\
+ & TTFT/ms & 77 & 337 & \textit{189}$^\dagger$ & \textit{484}$^\dagger$ & 171 \\
+\midrule
+\multirow{5}{*}{Mistral-7B} & Rec. & 35.0{\scriptsize$\pm$0.7} & 52.4{\scriptsize$\pm$1.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$17.4}} & 40.3{\scriptsize$\pm$1.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$5.4}} & 65.0{\scriptsize$\pm$1.3}\,{\tiny\textcolor{green!55!black}{$\uparrow$30.1}} & \textbf{69.8{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$34.9}} \\
+ & Rea. & 44.3{\scriptsize$\pm$1.0} & 50.2{\scriptsize$\pm$0.7}\,{\tiny\textcolor{green!55!black}{$\uparrow$5.9}} & 36.7{\scriptsize$\pm$0.7}\,{\tiny\textcolor{red!70!black}{$\downarrow$7.6}} & 57.2{\scriptsize$\pm$1.2}\,{\tiny\textcolor{green!55!black}{$\uparrow$12.9}} & \textbf{75.4{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$31.1}} \\
+ & Trust. & 37.1{\scriptsize$\pm$0.5} & 19.6{\scriptsize$\pm$2.3}\,{\tiny\textcolor{red!70!black}{$\downarrow$17.5}} & 31.8{\scriptsize$\pm$2.8}\,{\tiny\textcolor{red!70!black}{$\downarrow$5.3}} & 19.0{\scriptsize$\pm$0.9}\,{\tiny\textcolor{red!70!black}{$\downarrow$18.1}} & \textbf{55.7{\scriptsize$\pm$1.1}}\,{\tiny\textcolor{green!55!black}{$\uparrow$18.6}} \\
+ & Avg & 38.0{\scriptsize$\pm$0.6} & 39.4{\scriptsize$\pm$1.3}\,{\tiny\textcolor{green!55!black}{$\uparrow$1.4}} & 35.2{\scriptsize$\pm$0.5}\,{\tiny\textcolor{red!70!black}{$\downarrow$2.8}} & 45.8{\scriptsize$\pm$0.3}\,{\tiny\textcolor{green!55!black}{$\uparrow$7.8}} & \textbf{66.8{\scriptsize$\pm$0.4}}\,{\tiny\textcolor{green!55!black}{$\uparrow$28.8}} \\
+ & TTFT/ms & --- & --- & --- & --- & --- \\
+\midrule
+\multirow{5}{*}{Qwen3-8B} & Rec. & 32.8{\scriptsize$\pm$0.4} & 62.9{\scriptsize$\pm$0.3}\,{\tiny\textcolor{green!55!black}{$\uparrow$30.2}} & 29.1{\scriptsize$\pm$1.5}\,{\tiny\textcolor{red!70!black}{$\downarrow$3.7}} & 52.6{\scriptsize$\pm$0.7}\,{\tiny\textcolor{green!55!black}{$\uparrow$19.8}} & \textbf{76.1{\scriptsize$\pm$0.2}}\,{\tiny\textcolor{green!55!black}{$\uparrow$43.3}} \\
+ & Rea. & 26.3{\scriptsize$\pm$0.8} & 50.1{\scriptsize$\pm$0.9}\,{\tiny\textcolor{green!55!black}{$\uparrow$23.8}} & 21.1{\scriptsize$\pm$1.0}\,{\tiny\textcolor{red!70!black}{$\downarrow$5.2}} & 36.3{\scriptsize$\pm$0.8}\,{\tiny\textcolor{green!55!black}{$\uparrow$10.0}} & \textbf{75.3{\scriptsize$\pm$1.3}}\,{\tiny\textcolor{green!55!black}{$\uparrow$48.9}} \\
+ & Trust. & 33.8{\scriptsize$\pm$1.4} & 23.9{\scriptsize$\pm$0.7}\,{\tiny\textcolor{red!70!black}{$\downarrow$9.9}} & 23.0{\scriptsize$\pm$0.3}\,{\tiny\textcolor{red!70!black}{$\downarrow$10.8}} & 17.6{\scriptsize$\pm$0.4}\,{\tiny\textcolor{red!70!black}{$\downarrow$16.2}} & \textbf{57.5{\scriptsize$\pm$0.8}}\,{\tiny\textcolor{green!55!black}{$\uparrow$23.7}} \\
+ & Avg & 30.0{\scriptsize$\pm$0.6} & 44.3{\scriptsize$\pm$0.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$14.3}} & 23.4{\scriptsize$\pm$0.8}\,{\tiny\textcolor{red!70!black}{$\downarrow$6.6}} & 33.7{\scriptsize$\pm$0.3}\,{\tiny\textcolor{green!55!black}{$\uparrow$3.7}} & \textbf{69.6{\scriptsize$\pm$0.6}}\,{\tiny\textcolor{green!55!black}{$\uparrow$39.6}} \\
+ & TTFT/ms & 167 & 724 & \textit{482}$^\dagger$ & \textit{1106}$^\dagger$ & 394 \\
+\midrule
+\multirow{5}{*}{Qwen3-32B} & Rec. & 37.8{\scriptsize$\pm$0.4} & 64.6{\scriptsize$\pm$0.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$26.8}} & 37.0{\scriptsize$\pm$1.8}\,{\tiny\textcolor{red!70!black}{$\downarrow$0.8}} & 66.8{\scriptsize$\pm$1.6}\,{\tiny\textcolor{green!55!black}{$\uparrow$29.1}} & \textbf{79.7{\scriptsize$\pm$1.0}}\,{\tiny\textcolor{green!55!black}{$\uparrow$42.0}} \\
+ & Rea. & 29.4{\scriptsize$\pm$0.4} & 46.1{\scriptsize$\pm$0.2}\,{\tiny\textcolor{green!55!black}{$\uparrow$16.7}} & 26.7{\scriptsize$\pm$1.3}\,{\tiny\textcolor{red!70!black}{$\downarrow$2.7}} & 48.2{\scriptsize$\pm$0.6}\,{\tiny\textcolor{green!55!black}{$\uparrow$18.8}} & \textbf{83.8{\scriptsize$\pm$0.5}}\,{\tiny\textcolor{green!55!black}{$\uparrow$54.4}} \\
+ & Trust. & 36.7{\scriptsize$\pm$1.0} & 27.2{\scriptsize$\pm$2.0}\,{\tiny\textcolor{red!70!black}{$\downarrow$9.6}} & 27.4{\scriptsize$\pm$1.1}\,{\tiny\textcolor{red!70!black}{$\downarrow$9.4}} & 23.2{\scriptsize$\pm$1.1}\,{\tiny\textcolor{red!70!black}{$\downarrow$13.6}} & \textbf{51.7{\scriptsize$\pm$0.4}}\,{\tiny\textcolor{green!55!black}{$\uparrow$15.0}} \\
+ & Avg & 33.2{\scriptsize$\pm$0.4} & 44.2{\scriptsize$\pm$0.5}\,{\tiny\textcolor{green!55!black}{$\uparrow$11.0}} & 29.4{\scriptsize$\pm$0.7}\,{\tiny\textcolor{red!70!black}{$\downarrow$3.8}} & 44.5{\scriptsize$\pm$0.8}\,{\tiny\textcolor{green!55!black}{$\uparrow$11.3}} & \textbf{71.8{\scriptsize$\pm$0.4}}\,{\tiny\textcolor{green!55!black}{$\uparrow$38.6}} \\
+ & TTFT/ms & 290 & 2524 & \textit{1489}$^\dagger$ & \textit{3630}$^\dagger$ & 1380 \\
+\bottomrule
+\end{tabular}
+\vspace{-6pt}
+\end{table}

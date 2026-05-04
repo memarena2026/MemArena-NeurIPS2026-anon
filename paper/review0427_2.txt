@@ -1,0 +1,82 @@
+insight0427_2.txt我按“会不会影响接收判断”的严重度来列。
+
+先说结论：这篇 paper 的问题意识是好的，benchmark 设计也有明显野心；但从审稿人视角看，我会有一串相当实质性的 concern，尤其集中在 **外部效度、结论归因是否干净、评测/标注可靠性、以及 on-device 结论的可泛化性**。以下是我会写进 review 里的点。
+
+**一、最可能影响接收的 major concerns**
+
+1. **外部效度仍然偏弱，benchmark 更像“高控制 synthetic stress test”，还称不上现实 personal memory assistant 的充分代理。**
+   论文核心数据来自 single-world、多 agent 的 synthetic simulation；作者自己也承认它是 English-only、text-only，缺少真实对话噪声、code-switching、multimodality、跨文化 privacy norm，而且窗口只有 15 天。也就是说，这个 benchmark 很适合测某些能力，但和真实个人助理的 deployment reality 之间仍有明显距离。 
+
+2. **“single coherent world”虽然有利于跨 session 推理，但也带来 world-specific bias；统计结论没有覆盖 world-generation uncertainty。**
+   他们强调 coherent single-world provenance，但主结果是在一个固定的 50-agent、15-day 世界上得出的；附录的 bootstrap 也是在 50 个 ego persona 上 resample，而不是在多个独立生成世界上 resample。这样得到的显著性，更像“在这个世界里显著”，而不是“对这种 benchmark family 普遍显著”。 
+
+3. **day-batched temporal isolation 可能扭曲了真实的时序因果。**
+   文中明确说，同一天的所有 session 共享 same beginning-of-day state，memory updates 只在 day boundary 提交。现实里上午的一次谈话经常会影响下午的谈话；这里人为切断了同日内部的因果链。作者把这解释为保证 temporal consistency，但从 reviewer 视角，这依然是在“改写任务”，不是纯工程细节。
+
+4. **person-agent sessions / memory probes 把 benchmark 结构“写进了数据”，可能高估了某类 memory system 的收益。**
+   附录里说 person-agent sessions 是 first-class component，其中包括 activity narration、memory reflection、memory probes，且 probe 会主动 eliciting recall、conflict resolution、temporal reasoning。这个设计当然有利于构造题目，但它也让语料更像“为了被测而生成”的数据，而不是自然发生的 personal conversation stream。
+
+5. **D3 的 ground truth 仍有较强的 LLM 依赖，而 human validation 不够扎实。**
+   作者自己承认 D3 的 gold 是 LLM-generated；judge–human calibration 目标是 500 条，但目前只标了 151 条，而且是 one author-annotator。更关键的是，cross-judge validation 的 mean Cohen’s kappa 只有 0.568；human calibration 里 confabulation 的 κ 只有 0.538，anaphora 也只有 0.696。对一个 benchmark paper 来说，这离“评测可靠性已经很稳”还有距离。 
+
+6. **D6 的评测定义仍然过于简化，和真实 privacy / access control 有明显 gap。**
+   D6 是 deterministic refusal/disclosure classifier，不用 LLM judge；而人工 rubric 虽然更细（五级），却没有用于正式 metric。再加上作者自己承认 D6 probes 是 synthetic single-turn fishing attempts，覆盖不到 multi-turn social engineering 和更细腻的 contextual probing。也就是说，D6 很新，但当前版本更像一个 coarse proxy，而不是强形式的 permission benchmark。 
+
+7. **文中存在一个明显的数值/表述不一致，削弱对 D6 结论的信任。**
+   主文第 7 页写的是 “Under Oracle, withholding accuracy is 0.0–0.8% across all five readers”；但附录 Table 24 里 Oracle × Llama-3.2-3B 的 Withhold 明明是 **7.9±0.7**。这种错误不只是 typo，因为它正好落在论文最强调的 finding 上。这个地方如果不修，我会质疑作者对结果表述是否足够严谨。 
+
+8. **Finding 1 里 “RAG 会让 D5 abstention 崩掉” 这个叙事并不干净，至少部分是 prompt-format artifact。**
+   附录 A.9（我通读了）明确指出：只改 retrieved chunk 的 surface wrap，不改 retrieval content、不改 top-k、不改 evidence，D5 就能在 4/5 个模型上恢复到 Vanilla-level 或更高。也就是说，主文把这件事讲成 retrieval/structured-memory 的结构性差异，力度过头了；更准确的说法应当是：**当前主表里的 RAG 实现方式** 会导致 D5 crash，而不是 “RAG 作为范式” 必然如此。 
+
+9. **Memobase > Oracle 的核心比较并不是一个“干净的上界比较”。**
+   附录 A.14/A.15 很关键：作者自己写到 mechanism (c) 很可能是主因——Memobase ingest 了 **所有 ego sessions**，包括 Oracle condition 排除掉的 non-evidence context；而对 Oracle evidence 做 post-hoc structuring 反而会让所有 reader 大幅掉点。再加上 A.8 里 Oracle-with-distractors 还能给 4/5 个模型再涨 6.8–8.6 pp，说明 plain Oracle 本身也不是 tight upper bound。那主文里把“Memobase 超 Oracle”直接归因为 ingest-time aggregation crosses in-context ceiling，证据并不够干净。  
+
+10. **baseline family 的可比性不够稳，系统实现细节在很大程度上决定结果。**
+    Mem0 在 50-agent L-scale 下不能 cleanly complete Config-A ingestion，所以被排除出主表；Mistral-7B × Memobase 的巨大劣势，作者也归因为 ingest-time format-compliance failure，而不是模型能力本身。对 benchmark paper 来说，这说明结果对 adapter / SDK / schema contract 非常敏感；一些 headline claim 其实可能是 integration quality claim。
+
+11. **retrieval baseline 仍显得不够“定型”，因此 structured memory 的优势有被 baseline weakness 放大的风险。**
+    论文自己展示了大量 retrieval-side sensitivity：dense retrieval 可以带来大幅变化，provenance chunk header 让 9 个维度里的 7 个变差，甚至同一类 RAG 只换组织方式就会有极大波动。这说明“RAG 是弱基线”未必成立，更可能是“当前检索+组织 pipeline 非常脆弱”。在这种情况下，把结论上升为 ingest-time structuring > retrieval，还是太快。
+
+12. **same-family leakage 仍没有被充分排除。**
+    对话生成使用 Qwen3-235B；主评测里又有三个 Qwen answer model；Config A 还让 extractor 和 answerer 共享 family。作者用了 Llama/Mistral 做 cross-family control，这有帮助，但规模还是太小，不能真正排掉生成风格、schema compliance、surface regularity 对 Qwen family 的偏好。
+
+**二、重要但次一级的 concerns**
+
+13. **on-device 结论有点被说重了。**
+    准确率跑在 H200 server，上电能/温度跑在 DGX Spark；作者也明说只是“representative device target”，不是 exact fit。更重要的是，能耗是 GPU-only via NVML，CPU/DRAM/I/O 全都不算；latency 还来自 timing_reliable 的 low-concurrency subset。对“structured memory beats scaling on-device”这种 deployment-facing claim，我会要求作者把结论语气收一点。  
+
+14. **效率结果和主表 workload 之间还有对齐问题。**
+    附录里有 “Spark 8-agent latency-anchor subset ... pending” 的表，这意味着部分 Spark 侧 on-device profiling 并没有完全在主文 50-agent 规模上闭环。既然作者把 energy/thermal 作为核心 finding 的一部分，这块最好更完整。
+
+15. **headline Avg 没有纳入 D6，这让论文最“新”的 trustworthiness 维度不影响主榜单。**
+    作者解释说 D6 的 deterministic scale 不同，放进 macro-mean 会 dominate；这个解释我能理解。但副作用也很明显：论文最想强调的新问题，最终没有进入主 headline number。于是“Avg 更高”并不等于“更可信/更安全”。这在 benchmark communication 上会造成误导。
+
+16. **scope 上仍然是 off-policy benchmark，不能覆盖在线 memory management。**
+    作者自己把 AMemGym 定位成互补，因为那边测的是 online write/read/utilization policies，而 MEMARENA 是 off-policy。既然论文题目和 framing 都是 personal memory assistants，我会要求作者更克制地限定 claim scope：这更像“读出/推理 benchmark”，不是完整 memory system benchmark。
+
+17. **“ecological daily density ≈10K tokens/day” 的依据仍偏 heuristic。**
+    这个数来自 Mehl / Tidwell / Dunbar 的 daily words，再叠加 OpenAI/Gemini/Anthropic 的 token-per-word heuristics。作为设计动机可以，但作为 benchmark ecological validity 的关键支点，论证还不够硬，尤其对不同语言、ASR transcript、不同社会群体都未必成立。
+
+18. **数据规模并没有大到足以让一些细维度结论特别稳。**
+    MEMARENA-L 是 1,579 evaluation instances；D6 每 seed 只有 200 items，且分成 80 DENY / 120 ALLOW。对一个六维 benchmark 来说，这个规模不算小，但也不足以让我完全放心地下强结论，尤其是最 novel 的 trustworthiness 维度。 
+
+19. **主实验没有 reader-side closed-model upper bound。**
+    论文坚持 local open-weight，是为了和 on-device / privacy 叙事一致；这个逻辑成立。但从 benchmark paper 的角度，我仍会希望看到至少一个强 closed reader 作为 sanity upper bound，否则很难区分“benchmark genuinely hard” 和 “当前本地 reader 太弱”。
+
+20. **复现性在审稿时并不完整。**
+    摘要写的是 code and benchmark released upon acceptance；结尾也说 code/data will be released。对 benchmark paper 而言，这通常不是最佳状态，因为 reviewer 很难真正 audit pipeline、judge prompt、instance construction。 
+
+**三、minor / editorial concerns**
+
+21. **论文写作有明显编辑痕迹。**
+    第 2 页 introduction 里有重复句子和未清理文本，例如 coherence 段落的整句重复，以及 contributions 里 “To our best knowledge ... More specifically ... To our best knowledge ...” 这种残留。对一篇 benchmark paper 来说，这会明显降低可信度和完成度。
+
+22. **有些最关键的限定条件埋在 appendix，而主文表述过满。**
+    例如 plain Oracle 不是 tight upper bound、RAG 的 D5 crash largely prompt-format-induced、Memobase > Oracle partly 来自 broader context，这些都需要读很深的 appendix 才看出来。主文应该更主动把这些 caveat 拉出来。 
+
+如果我是 reviewer，我的**最阻塞**三点会是：
+第一，**主结论的归因不够干净**，尤其是 RAG/D5 和 Memobase>Oracle 两条。
+第二，**benchmark 的外部效度仍明显受限**，single-world + synthetic + English-only + day-batched 的组合，让“realistic personal assistant”这个 framing 说得太满。
+第三，**结果呈现存在硬伤**，包括 D6 文本/表格不一致、以及一些重要 caveat 只在 appendix 里承认。  
+
+如果你下一条消息要，我可以把这些 concern 直接整理成一份正式的审稿意见模板：`Summary / Strengths / Weaknesses / Questions for Authors / Recommendation rationale`。

@@ -1,0 +1,69 @@
+\begin{table}[t]
+\centering
+\caption{Per paper-dimension accuracy on \benchL{} with mean $\pm$ sample std across stochastic seeds. D1--D2: Memory Recall; D3--D4: Memory Reasoning; D5--D6: Memory Trustworthiness. Cells reporting $n = 1$ are s1-only (see Table~\ref{tab:results-L} note).}
+\label{tab:results-L-full}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}ll cccccc c@{}}
+\toprule
+& & \multicolumn{2}{c}{\textit{Recall}} & \multicolumn{2}{c}{\textit{Reasoning}} & \multicolumn{2}{c}{\textit{Trustworthiness}} & \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8}
+Backend & Model & D1 & D2 & D3 & D4 & D5 & D6 & Avg \\
+\midrule
+\multirow{5}{*}{Vanilla}
+  & Qwen3-0.6B     & 44.1{\scriptsize$\pm$0.8} & 22.9{\scriptsize$\pm$1.2} & 31.8{\scriptsize$\pm$0.6} & 36.8{\scriptsize$\pm$0.6} & 61.2{\scriptsize$\pm$0.0} & 12.5{\scriptsize$\pm$1.7} & 39.3{\scriptsize$\pm$0.3} \\
+
+  & Llama-3.2-3B   & 57.4{\scriptsize$\pm$0.8} & 8.1{\scriptsize$\pm$0.7} & 30.4{\scriptsize$\pm$1.3} & 24.9{\scriptsize$\pm$1.4} & 60.2{\scriptsize$\pm$0.3} & 8.2{\scriptsize$\pm$1.6} & 36.2{\scriptsize$\pm$0.5} \\
+
+  & Mistral-7B     & 55.2{\scriptsize$\pm$0.3} & 11.2{\scriptsize$\pm$1.8} & 46.4{\scriptsize$\pm$1.4} & 41.2{\scriptsize$\pm$2.4} & 59.8{\scriptsize$\pm$0.3} & 11.8{\scriptsize$\pm$1.5} & 42.8{\scriptsize$\pm$0.7} \\
+
+  & Qwen3-8B       & 55.9{\scriptsize$\pm$0.6} & 5.7{\scriptsize$\pm$0.3} & 30.6{\scriptsize$\pm$0.3} & 20.0{\scriptsize$\pm$1.5} & 61.2{\scriptsize$\pm$0.0} & 13.3{\scriptsize$\pm$1.3} & 34.7{\scriptsize$\pm$0.4} \\
+
+  & Qwen3-32B      & 67.0{\scriptsize$\pm$0.3} & 3.6{\scriptsize$\pm$0.6} & 37.3{\scriptsize$\pm$0.6} & 17.8{\scriptsize$\pm$1.0} & 61.0{\scriptsize$\pm$0.9} & 13.2{\scriptsize$\pm$1.9} & 37.3{\scriptsize$\pm$0.2} \\
+\midrule
+\multirow{5}{*}{RAG}
+  & Qwen3-0.6B     & 52.7{\scriptsize$\pm$1.3} & 34.9{\scriptsize$\pm$3.7} & 44.3{\scriptsize$\pm$0.5} & 26.0{\scriptsize$\pm$2.2} & 18.0{\scriptsize$\pm$1.8} & 11.2{\scriptsize$\pm$0.3} & 35.2{\scriptsize$\pm$1.3} \\
+
+  & Llama-3.2-3B   & 62.3{\scriptsize$\pm$0.3} & 41.4{\scriptsize$\pm$1.6} & 52.4{\scriptsize$\pm$0.9} & 20.3{\scriptsize$\pm$1.6} & 33.3{\scriptsize$\pm$1.2} & 9.3{\scriptsize$\pm$1.5} & 41.9{\scriptsize$\pm$0.2} \\
+
+  & Mistral-7B     & 61.4{\scriptsize$\pm$3.1} & 41.8{\scriptsize$\pm$0.9} & 63.5{\scriptsize$\pm$1.1} & 30.6{\scriptsize$\pm$0.3} & 31.2{\scriptsize$\pm$3.1} & 19.2{\scriptsize$\pm$1.0} & 45.7{\scriptsize$\pm$1.3} \\
+
+  & Qwen3-8B       & 75.4{\scriptsize$\pm$0.3} & 48.3{\scriptsize$\pm$0.7} & 63.0{\scriptsize$\pm$0.4} & 31.1{\scriptsize$\pm$1.9} & 46.7{\scriptsize$\pm$0.9} & 15.2{\scriptsize$\pm$0.8} & 52.9{\scriptsize$\pm$0.3} \\
+
+  & Qwen3-32B      & 77.3{\scriptsize$\pm$0.5} & 49.7{\scriptsize$\pm$1.6} & 63.9{\scriptsize$\pm$1.1} & 19.9{\scriptsize$\pm$1.0} & 48.4{\scriptsize$\pm$2.4} & 14.3{\scriptsize$\pm$1.8} & 51.8{\scriptsize$\pm$0.4} \\
+\midrule
+\multirow{5}{*}{Memobase}
+  & Qwen3-0.6B     & 31.0{\scriptsize$\pm$1.5} & 15.2{\scriptsize$\pm$2.7} & 31.3{\scriptsize$\pm$2.6} & 8.7{\scriptsize$\pm$2.4} & 26.5{\scriptsize$\pm$4.1} & 6.2{\scriptsize$\pm$1.9} & 22.5{\scriptsize$\pm$0.7} \\
+
+  & Llama-3.2-3B   & 46.0{\scriptsize$\pm$2.3} & 16.6{\scriptsize$\pm$1.0} & 33.5{\scriptsize$\pm$0.5} & 3.3{\scriptsize$\pm$0.7} & 33.5{\scriptsize$\pm$2.1} & 7.8{\scriptsize$\pm$0.8} & 26.6{\scriptsize$\pm$1.3} \\
+
+  & Mistral-7B     & 54.0{\scriptsize$\pm$1.7} & 24.3{\scriptsize$\pm$1.6} & 45.0{\scriptsize$\pm$1.6} & 24.5{\scriptsize$\pm$1.2} & 48.6{\scriptsize$\pm$5.7} & 12.8{\scriptsize$\pm$1.3} & 39.3{\scriptsize$\pm$0.6} \\
+
+  & Qwen3-8B       & 47.1{\scriptsize$\pm$2.5} & 7.9{\scriptsize$\pm$0.3} & 26.9{\scriptsize$\pm$1.1} & 12.5{\scriptsize$\pm$1.2} & 39.6{\scriptsize$\pm$3.5} & 9.8{\scriptsize$\pm$1.0} & 26.8{\scriptsize$\pm$1.4} \\
+
+  & Qwen3-32B      & 56.2{\scriptsize$\pm$3.6} & 14.4{\scriptsize$\pm$0.9} & 31.9{\scriptsize$\pm$0.9} & 19.0{\scriptsize$\pm$2.2} & 41.8{\scriptsize$\pm$2.7} & 10.2{\scriptsize$\pm$2.3} & 32.7{\scriptsize$\pm$1.0} \\
+\midrule
+\multirow{5}{*}{MemSearch}
+  & Qwen3-0.6B     & 75.4{\scriptsize$\pm$1.1} & 33.7{\scriptsize$\pm$1.0} & 48.5{\scriptsize$\pm$0.6} & 31.1{\scriptsize$\pm$0.9} & 19.6{\scriptsize$\pm$1.5} & 11.0{\scriptsize$\pm$2.2} & 41.7{\scriptsize$\pm$0.4} \\
+
+  & Llama-3.2-3B   & 81.0{\scriptsize$\pm$1.1} & 42.2{\scriptsize$\pm$0.7} & 57.4{\scriptsize$\pm$1.5} & 20.3{\scriptsize$\pm$1.1} & 34.3{\scriptsize$\pm$2.1} & 16.3{\scriptsize$\pm$3.5} & 47.0{\scriptsize$\pm$0.3} \\
+
+  & Mistral-7B     & 73.6{\scriptsize$\pm$1.1} & 55.0{\scriptsize$\pm$3.1} & 69.9{\scriptsize$\pm$0.5} & 38.3{\scriptsize$\pm$2.6} & 24.5{\scriptsize$\pm$0.9} & 16.2{\scriptsize$\pm$1.0} & 52.3{\scriptsize$\pm$0.3} \\
+
+  & Qwen3-8B       & 79.3{\scriptsize$\pm$0.5} & 21.3{\scriptsize$\pm$1.2} & 49.3{\scriptsize$\pm$0.8} & 17.2{\scriptsize$\pm$2.5} & 32.5{\scriptsize$\pm$1.2} & 17.0{\scriptsize$\pm$3.0} & 39.9{\scriptsize$\pm$0.3} \\
+
+  & Qwen3-32B      & 87.2{\scriptsize$\pm$0.8} & 43.0{\scriptsize$\pm$2.7} & 60.9{\scriptsize$\pm$0.6} & 29.4{\scriptsize$\pm$1.0} & 37.8{\scriptsize$\pm$2.4} & 15.8{\scriptsize$\pm$2.0} & 51.7{\scriptsize$\pm$0.8} \\
+\midrule
+\multirow{5}{*}{Oracle}
+  & Qwen3-0.6B     & 77.1{\scriptsize$\pm$1.1} & 44.4{\scriptsize$\pm$1.0} & 44.6{\scriptsize$\pm$0.9} & 69.5{\scriptsize$\pm$1.8} & 61.0{\scriptsize$\pm$1.2} & 35.3{\scriptsize$\pm$1.5} & 59.3{\scriptsize$\pm$0.9} \\
+
+  & Llama-3.2-3B   & 90.4{\scriptsize$\pm$0.9} & 49.3{\scriptsize$\pm$0.9} & 64.9{\scriptsize$\pm$1.0} & 69.1{\scriptsize$\pm$2.6} & 67.3{\scriptsize$\pm$0.3} & 36.5{\scriptsize$\pm$1.0} & 68.2{\scriptsize$\pm$0.1} \\
+
+  & Mistral-7B     & 88.6{\scriptsize$\pm$0.3} & 47.9{\scriptsize$\pm$1.6} & 71.1{\scriptsize$\pm$0.9} & 81.8{\scriptsize$\pm$0.8} & 67.1{\scriptsize$\pm$2.9} & 39.8{\scriptsize$\pm$0.6} & 71.3{\scriptsize$\pm$0.6} \\
+
+  & Qwen3-8B       & 97.0{\scriptsize$\pm$0.0} & 51.7{\scriptsize$\pm$0.3} & 68.3{\scriptsize$\pm$1.8} & 85.5{\scriptsize$\pm$0.6} & 73.3{\scriptsize$\pm$0.9} & 39.0{\scriptsize$\pm$2.2} & 75.2{\scriptsize$\pm$0.7} \\
+
+  & Qwen3-32B      & 97.5{\scriptsize$\pm$0.0} & 59.0{\scriptsize$\pm$2.1} & 77.4{\scriptsize$\pm$0.8} & 93.3{\scriptsize$\pm$0.7} & 74.3{\scriptsize$\pm$1.9} & 39.2{\scriptsize$\pm$0.6} & 80.3{\scriptsize$\pm$0.7} \\
+\bottomrule
+\end{tabular}
+\end{table}

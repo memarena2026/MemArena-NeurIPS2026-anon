@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>Human Judge Calibration — MemArena</title>
+<style>
+  :root {
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c222b; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#1f6feb;
+    --good:#238636; --bad:#da3633; --skip:#6e7681;
+    --warn:#d29922;
+    --d6-dc:#238636; --d6-dw:#da3633; --d6-dk:#6e7681;
+    --d6-ref:#a371f7; --d6-other:#8b949e;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+         background:var(--bg); color:var(--text); }
+  header { padding:10px 20px; border-bottom:1px solid var(--border);
+           background:var(--panel); position:sticky; top:0; z-index:10; }
+  .row1 { display:flex; justify-content:space-between; align-items:center; gap:16px; }
+  .row1 .left { display:flex; gap:14px; align-items:center; }
+  .row1 .counter { font-weight:600; font-size:15px; }
+  .row1 .progress { width:200px; height:7px; background:var(--border);
+                    border-radius:4px; overflow:hidden; }
+  .row1 .progress > div { height:100%; background:var(--accent); width:0; transition:width .25s; }
+  .reviewer-pill { background:var(--panel2); border:1px solid var(--border);
+                   padding:4px 10px; border-radius:12px; font-family:ui-monospace,monospace;
+                   font-size:12px; }
+  .reviewer-pill .me { color:#58a6ff; font-weight:700; }
+
+  .row2 { margin-top:8px; display:grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap:8px; font-size:12px; color:var(--muted); }
+  .stat-card { background:var(--panel2); border:1px solid var(--border);
+               border-radius:6px; padding:6px 10px; }
+  .stat-card .head { font-weight:600; color:var(--text); margin-bottom:4px;
+                     font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+  .stat-card .nums { font-family:ui-monospace,monospace; font-size:13px; color:var(--text); }
+  .stat-card .sub { font-family:ui-monospace,monospace; font-size:11px; color:var(--muted); }
+  .stat-card .me-tag { color:#58a6ff; font-weight:700; }
+
+  header button { background:var(--panel); color:var(--text); border:1px solid var(--border);
+                  padding:5px 10px; border-radius:6px; cursor:pointer; font-size:12px; }
+  header button:hover { border-color:var(--accent); }
+
+  main { max-width:920px; margin:18px auto; padding:0 20px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:10px;
+          padding:22px; margin-bottom:14px; }
+  .meta { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; color:var(--muted); font-size:12px; align-items:center; }
+  .meta .spacer { flex:1; }
+  .badge { background:#21262d; border:1px solid var(--border); border-radius:4px; padding:2px 8px;
+           font-family:ui-monospace,monospace; font-size:11px; color:var(--text); }
+  .badge.dim-d6 { border-color:#a371f7; color:#d2a8ff; }
+  .badge.allow  { border-color:#3fb950; color:#7ee787; }
+  .badge.deny   { border-color:#f85149; color:#ffa198; }
+  .your-tag { color:#8b949e; font-size:12px; }
+  .block { margin-bottom:12px; }
+  .block .label { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+                  margin-bottom:5px; font-weight:600; }
+  .block .body { font-size:14.5px; line-height:1.55; white-space:pre-wrap; word-wrap:break-word; }
+  .query  .body { color:#f0f6fc; }
+  .gold   .body { color:#7ee787; }
+  .pred   .body { color:#ffa657; }
+
+  .judge { border-top:1px dashed var(--border); padding-top:10px; margin-top:10px;
+           color:var(--muted); font-size:13px; display:none; }
+  .judge.shown { display:block; }
+  .judge .verdict { font-family:ui-monospace,monospace; color:#f0f6fc; font-weight:600; margin-bottom:5px; }
+
+  .controls { display:flex; gap:8px; justify-content:center; margin:18px 0 4px; flex-wrap:wrap; }
+  .controls button { font-size:13.5px; padding:8px 14px; border-radius:7px;
+                     border:1px solid var(--border); color:#fff; cursor:pointer;
+                     font-weight:600; }
+  .btn-good { background:var(--good); }
+  .btn-bad  { background:var(--bad); }
+  .btn-skip { background:var(--skip); }
+  .btn-d6-dc    { background:var(--d6-dc); }
+  .btn-d6-dw    { background:var(--d6-dw); }
+  .btn-d6-dk    { background:var(--d6-dk); }
+  .btn-d6-ref   { background:var(--d6-ref); }
+  .btn-d6-other { background:var(--d6-other); color:#0d1117; }
+  .controls button:hover { filter:brightness(1.12); }
+  .controls button.active { outline:2px solid #58a6ff; }
+
+  .navrow { display:flex; justify-content:space-between; align-items:center; margin-top:10px; color:var(--muted); font-size:12.5px; }
+  .navrow button { background:var(--panel); border:1px solid var(--border); color:var(--text);
+                   padding:5px 12px; border-radius:6px; cursor:pointer; }
+  .navrow button:disabled { opacity:.5; cursor:not-allowed; }
+  .hint { text-align:center; color:var(--muted); font-size:11.5px; margin-top:8px; }
+  .done { text-align:center; font-size:18px; color:var(--good); padding:40px 0; }
+
+  /* reviewer picker modal */
+  #picker {
+    position:fixed; inset:0; background:rgba(0,0,0,.7);
+    display:flex; align-items:center; justify-content:center; z-index:100;
+  }
+  #picker .box {
+    background:var(--panel); border:1px solid var(--border); border-radius:12px;
+    padding:32px 40px; min-width:340px; text-align:center;
+  }
+  #picker h2 { margin:0 0 16px 0; font-size:20px; }
+  #picker p { color:var(--muted); font-size:13px; margin:6px 0 18px; }
+  #picker .picks { display:flex; gap:12px; justify-content:center; }
+  #picker .picks button {
+    background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    padding:14px 28px; border-radius:10px; cursor:pointer; font-size:18px;
+    font-weight:700; font-family:ui-monospace,monospace;
+  }
+  #picker .picks button:hover { border-color:var(--accent); background:#1f2937; }
+  #picker .switch { color:var(--muted); font-size:11px; margin-top:14px; }
+</style>
+</head>
+<body>
+
+<div id="picker">
+  <div class="box">
+    <h2>选择标注员</h2>
+    <p>三人各自选一个 ID，开始前不要重复。</p>
+    <div class="picks">
+      <button data-id="0">0</button>
+      <button data-id="1">1</button>
+      <button data-id="2">2</button>
+    </div>
+    <div class="switch">点击 ID 后开始标注。任何时候点击右上角「切换」可改 ID。</div>
+  </div>
+</div>
+
+<header>
+  <div class="row1">
+    <div class="left">
+      <div class="reviewer-pill">我是 <span id="me" class="me">—</span></div>
+      <div class="counter"><span id="idx">0</span> / <span id="total">0</span></div>
+      <div class="progress"><div id="bar"></div></div>
+    </div>
+    <div>
+      <button id="revealBtn" title="reveal LLM judge (R)">显示 LLM (R)</button>
+      <button id="switchBtn" title="switch reviewer">切换</button>
+    </div>
+  </div>
+  <div class="row2" id="statsRow"></div>
+</header>
+
+<main>
+  <div id="cardWrap"></div>
+  <div class="hint" id="hint"></div>
+</main>
+
+<script>
+"use strict";
+// All user-content rendering uses textContent; never innerHTML for dynamic data.
+
+const STORAGE_KEY_REVIEWER = "memarena_reviewer";
+const STORAGE_KEY_CURSOR   = "memarena_cursor_v3";
+
+let SAMPLE = [];
+let myLabels = {};
+let cursor = 0;
+let reviewer = null;
+let revealed = false;
+let polling = null;
+
+async function fetchJSON(url, opts) {
+  const r = await fetch(url, opts || {});
+  if (!r.ok) throw new Error(url + ": HTTP " + r.status);
+  return await r.json();
+}
+async function loadSample() {
+  const j = await fetchJSON("/sample.json");
+  SAMPLE = j.sample || [];
+  document.getElementById("total").textContent = SAMPLE.length;
+}
+async function loadMyLabels() {
+  if (!reviewer) return;
+  const j = await fetchJSON("/api/labels/" + encodeURIComponent(reviewer));
+  myLabels = j.labels || {};
+}
+async function saveLabel(id, value, dim_kind) {
+  return fetchJSON("/api/label", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({reviewer: reviewer, id: id, value: value, dim_kind: dim_kind}),
+  });
+}
+
+// ---------- DOM helpers ----------
+function el(tag, attrs, children) {
+  const node = document.createElement(tag);
+  if (attrs) {
+    for (const k in attrs) {
+      if (k === "class") node.className = attrs[k];
+      else if (k === "dataset") {
+        for (const dk in attrs[k]) node.dataset[dk] = attrs[k][dk];
+      } else if (k === "onClick") {
+        node.addEventListener("click", attrs[k]);
+      } else if (k.startsWith("style.")) {
+        node.style[k.slice(6)] = attrs[k];
+      } else if (k === "disabled") {
+        if (attrs[k]) node.setAttribute("disabled", "disabled");
+      } else {
+        node.setAttribute(k, attrs[k]);
+      }
+    }
+  }
+  if (children == null) return node;
+  if (!Array.isArray(children)) children = [children];
+  for (const c of children) {
+    if (c == null || c === false) continue;
+    node.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return node;
+}
+function clearChildren(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+// ---------- reviewer picker ----------
+function showPicker() {
+  document.getElementById("picker").style.display = "flex";
+  stopPolling();
+}
+function hidePicker() {
+  document.getElementById("picker").style.display = "none";
+}
+function pickReviewer(id) {
+  reviewer = String(id);
+  localStorage.setItem(STORAGE_KEY_REVIEWER, reviewer);
+  document.getElementById("me").textContent = reviewer;
+  hidePicker();
+  init();
+}
+document.querySelectorAll("#picker .picks button").forEach(function (btn) {
+  btn.addEventListener("click", function () { pickReviewer(btn.dataset.id); });
+});
+document.getElementById("switchBtn").addEventListener("click", showPicker);
+
+// ---------- card rendering (no innerHTML for dynamic content) ----------
+function makeBlock(klass, labelText, bodyText) {
+  return el("div", {class: "block " + klass}, [
+    el("div", {class: "label"}, labelText),
+    el("div", {class: "body"}, bodyText || ""),
+  ]);
+}
+function makeBadge(text, extraClass) {
+  return el("span", {class: "badge" + (extraClass ? " " + extraClass : "")}, text);
+}
+
+const D6_BUTTONS = [
+  {value: "DISCLOSE_CORRECT", klass: "btn-d6-dc",    label: "DC · 正确披露"},
+  {value: "DISCLOSE_WRONG",   klass: "btn-d6-dw",    label: "DW · 错误披露"},
+  {value: "DONT_KNOW",        klass: "btn-d6-dk",    label: "DK · 不知道"},
+  {value: "REFUSE",           klass: "btn-d6-ref",   label: "RE · 拒绝"},
+  {value: "OTHER",            klass: "btn-d6-other", label: "OT · 其他"},
+];
+const BIN_BUTTONS = [
+  {value: 1, klass: "btn-good", label: "✓ 对 (1)"},
+  {value: 0, klass: "btn-bad",  label: "✗ 错 (0)"},
+];
+
+function renderCard() {
+  const wrap = document.getElementById("cardWrap");
+  clearChildren(wrap);
+
+  if (cursor >= SAMPLE.length) {
+    const done = el("div", {class: "card done"}, [
+      "全部 " + SAMPLE.length + " 条已浏览完毕。",
+      el("br", null, null), el("br", null, null),
+      "统计实时更新于页面顶部，无需手动下载。",
+    ]);
+    wrap.appendChild(done);
+    updateProgress();
+    return;
+  }
+
+  const d = SAMPLE[cursor];
+  const existing = myLabels[d.id];
+  const isD6 = d.dim_kind === "d6";
+
+  const meta = el("div", {class: "meta"});
+  if (isD6) {
+    const allow = d.expected_answer_mode === "disclose";
+    meta.appendChild(makeBadge("D6 · " + (allow ? "ALLOW" : "DENY"), "dim-d6"));
+    meta.appendChild(makeBadge(allow ? "expected: disclose" : "expected: abstain",
+                               allow ? "allow" : "deny"));
+  } else {
+    meta.appendChild(makeBadge(d.dim || "?"));
+  }
+  meta.appendChild(makeBadge(d.cell || "-"));
+  meta.appendChild(makeBadge(d.id || "-"));
+  meta.appendChild(el("span", {class: "spacer"}, null));
+  if (existing != null) {
+    let tag;
+    if (existing === "skip") tag = "你: 跳过";
+    else if (isD6) tag = "你: " + existing;
+    else tag = existing === 1 ? "你: ✓ 对" : "你: ✗ 错";
+    meta.appendChild(el("span", {class: "your-tag"}, tag));
+  }
+
+  const judgeBox = el("div", {class: "judge" + (revealed ? " shown" : ""), id: "judgeBox"}, [
+    el("div", {class: "verdict"},
+       isD6 ? ("JUDGE: " + d.judge_label)
+            : (d.judge_correct ? "JUDGE: CORRECT (True)" : "JUDGE: INCORRECT (False)")),
+    el("div", null, d.judge_reason || ""),
+  ]);
+
+  // controls
+  const controls = el("div", {class: "controls", id: "controls"});
+  function makeBtn(value, klass, labelText) {
+    const isActive = (existing === value)
+      || (typeof value === "number" && existing === value);
+    const btn = el("button", {class: klass + (isActive ? " active" : "")}, labelText);
+    btn.addEventListener("click", function () { mark(value); });
+    return btn;
+  }
+  if (isD6) {
+    for (const b of D6_BUTTONS) controls.appendChild(makeBtn(b.value, b.klass, b.label));
+  } else {
+    for (const b of BIN_BUTTONS) controls.appendChild(makeBtn(b.value, b.klass, b.label));
+  }
+  controls.appendChild(makeBtn("skip", "btn-skip", "↷ 跳过 (S)"));
+
+  const navrow = el("div", {class: "navrow"}, [
+    (function () {
+      const b = el("button", {disabled: cursor === 0}, "← 上一题");
+      b.addEventListener("click", prev);
+      return b;
+    })(),
+    el("div", null, (cursor + 1) + " / " + SAMPLE.length),
+    (function () {
+      const b = el("button", {disabled: cursor >= SAMPLE.length - 1}, "下一题 →");
+      b.addEventListener("click", next);
+      return b;
+    })(),
+  ]);
+
+  const card = el("div", {class: "card"}, [
+    meta,
+    makeBlock("query", "Query (用户问题)", d.query),
+    makeBlock("gold", "Gold (标准答案)", d.gold),
+    makeBlock("pred", "Model Prediction (模型输出)", d.prediction),
+    judgeBox,
+    controls,
+    navrow,
+  ]);
+  wrap.appendChild(card);
+
+  document.getElementById("hint").textContent = isD6
+    ? "D6 5-label: DC=正确披露  DW=错误披露  DK=不知道  RE=拒绝  OT=其他    |    S=跳过  ←/→=上/下题  R=显示 LLM 判断"
+    : "1=对   0/2=错   S/Space=跳过   ←/→=上/下题   R=显示 LLM 判断";
+  updateProgress();
+}
+
+function updateProgress() {
+  document.getElementById("idx").textContent = Math.min(cursor, SAMPLE.length);
+  const done = Object.values(myLabels).filter(function (v) {
+    return v !== "skip" && v != null;
+  }).length;
+  document.getElementById("bar").style.width =
+    (100 * done / Math.max(1, SAMPLE.length)) + "%";
+}
+
+async function mark(value) {
+  if (cursor >= SAMPLE.length) return;
+  const d = SAMPLE[cursor];
+  myLabels[d.id] = value;
+  try {
+    await saveLabel(d.id, value, d.dim_kind);
+  } catch (e) {
+    alert("保存失败: " + e.message);
+    return;
+  }
+  revealed = false;
+  cursor = Math.min(cursor + 1, SAMPLE.length);
+  localStorage.setItem(STORAGE_KEY_CURSOR, JSON.stringify({reviewer: reviewer, cursor: cursor}));
+  renderCard();
+  refreshStats();
+}
+
+function next() {
+  if (cursor < SAMPLE.length) {
+    cursor = Math.min(cursor + 1, SAMPLE.length);
+    revealed = false;
+    localStorage.setItem(STORAGE_KEY_CURSOR, JSON.stringify({reviewer: reviewer, cursor: cursor}));
+    renderCard();
+  }
+}
+function prev() {
+  if (cursor > 0) {
+    cursor--;
+    revealed = false;
+    localStorage.setItem(STORAGE_KEY_CURSOR, JSON.stringify({reviewer: reviewer, cursor: cursor}));
+    renderCard();
+  }
+}
+function toggleReveal() {
+  revealed = !revealed;
+  const box = document.getElementById("judgeBox");
+  if (box) box.classList.toggle("shown", revealed);
+}
+
+// ---------- stats panel ----------
+function fmtKappa(k, n) {
+  if (k == null) return "— (n=" + n + ")";
+  return k.toFixed(3) + " (n=" + n + ")";
+}
+function makeStatCard(headText, lines) {
+  const card = el("div", {class: "stat-card"});
+  card.appendChild(el("div", {class: "head"}, headText));
+  for (const line of lines) {
+    if (line == null) continue;
+    if (Array.isArray(line)) {
+      const div = el("div", {class: line[0]}, line[1]);
+      if (line[2]) {
+        for (const span of line[2]) div.appendChild(span);
+      }
+      card.appendChild(div);
+    } else {
+      card.appendChild(el("div", {class: "nums"}, line));
+    }
+  }
+  return card;
+}
+async function refreshStats() {
+  try {
+    const s = await fetchJSON("/api/stats");
+    if (s.error) return;
+    const row = document.getElementById("statsRow");
+    clearChildren(row);
+
+    const prog = s.progress || {};
+    const reviewers = s.reviewers || ["0", "1", "2"];
+
+    for (const name of reviewers) {
+      const p = prog[name] || {completed: 0, skipped: 0, total: SAMPLE.length};
+      const headSpans = [document.createTextNode("标注员 " + name)];
+      if (name === reviewer) {
+        headSpans.push(document.createTextNode(" · "));
+        headSpans.push(el("span", {class: "me-tag"}, "我"));
+      }
+      const head = el("div", {class: "head"});
+      for (const s2 of headSpans) head.appendChild(s2);
+
+      const dim = (s.per_dim_progress && s.per_dim_progress[name]) || {};
+      const dimStr = Object.keys(dim).sort()
+        .map(function (k) { return k + "=" + dim[k]; }).join("  ") || "—";
+
+      const card = el("div", {class: "stat-card"}, [
+        head,
+        el("div", {class: "nums"}, [
+          (p.completed + " / " + (p.total || SAMPLE.length)),
+          el("span", {class: "sub"}, "  · skip " + p.skipped),
+        ]),
+        el("div", {class: "sub"}, dimStr),
+      ]);
+      row.appendChild(card);
+    }
+
+    const fb = (s.fleiss && s.fleiss.binary) || {};
+    const fd = (s.fleiss && s.fleiss.d6) || {};
+    const cb = (s.cohen_majority_vs_judge && s.cohen_majority_vs_judge.binary) || {};
+    const cd = (s.cohen_majority_vs_judge && s.cohen_majority_vs_judge.d6) || {};
+    const noCons = cd.no_consensus ? "  · ties " + cd.no_consensus : "";
+
+    row.appendChild(el("div", {class: "stat-card"}, [
+      el("div", {class: "head"}, "Fleiss' κ (人-人)"),
+      el("div", {class: "nums"}, "binary: " + fmtKappa(fb.kappa, fb.n)),
+      el("div", {class: "nums"}, "d6:     " + fmtKappa(fd.kappa, fd.n)),
+    ]));
+    row.appendChild(el("div", {class: "stat-card"}, [
+      el("div", {class: "head"}, "Cohen's κ (majority vs LLM)"),
+      el("div", {class: "nums"}, "binary: " + fmtKappa(cb.kappa, cb.n)),
+      el("div", {class: "nums"}, [
+        "d6:     " + fmtKappa(cd.kappa, cd.n),
+        el("span", {class: "sub"}, noCons),
+      ]),
+    ]));
+  } catch (e) { /* server hiccup; ignore */ }
+}
+function startPolling() {
+  if (polling) return;
+  refreshStats();
+  polling = setInterval(refreshStats, 4000);
+}
+function stopPolling() {
+  if (polling) { clearInterval(polling); polling = null; }
+}
+
+// ---------- keyboard ----------
+document.getElementById("revealBtn").addEventListener("click", toggleReveal);
+document.addEventListener("keydown", function (e) {
+  if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+  if (document.getElementById("picker").style.display !== "none") return;
+  const d = SAMPLE[cursor];
+  const isD6 = d && d.dim_kind === "d6";
+  if (e.key === "r" || e.key === "R") { toggleReveal(); e.preventDefault(); return; }
+  if (e.key === "ArrowLeft") { prev(); e.preventDefault(); return; }
+  if (e.key === "ArrowRight") { next(); e.preventDefault(); return; }
+  if (e.key === "s" || e.key === "S" || e.key === " ") { mark("skip"); e.preventDefault(); return; }
+  if (!isD6) {
+    if (e.key === "1" || e.key.toLowerCase() === "y") { mark(1); e.preventDefault(); }
+    else if (e.key === "0" || e.key === "2" || e.key.toLowerCase() === "n") { mark(0); e.preventDefault(); }
+  }
+});
+
+async function init() {
+  await loadSample();
+  await loadMyLabels();
+  try {
+    const c = JSON.parse(localStorage.getItem(STORAGE_KEY_CURSOR) || "null");
+    if (c && c.reviewer === reviewer && Number.isInteger(c.cursor)) {
+      cursor = Math.min(Math.max(0, c.cursor), SAMPLE.length);
+    } else { cursor = 0; }
+  } catch (e) { cursor = 0; }
+  renderCard();
+  startPolling();
+}
+
+(function bootstrap() {
+  const saved = localStorage.getItem(STORAGE_KEY_REVIEWER);
+  if (saved && /^[012]$/.test(saved)) {
+    pickReviewer(saved);
+  } else {
+    showPicker();
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+\section{Benchmark Design \texorpdfstring{\cred{[0.8 pages]}}{[0.8 pages]}}
+\label{sec:benchmark}
+\benchmark is designed to fill the aforementioned structural gaps (\S\ref{sec:intro}), assessing a personal agent's capability to faithfully recover what it observed, reason over evidences across time and sessions, and use memory responsibly under abstention and access-control constraints.
+%%XM into three top-level evaluation categories, operationalized as six concrete dimensions. 
+Inspired by HELM's multi-faceted evaluation methodology~\citep{liang2023helm} and loosely by the episodic--semantic distinction in human memory~\citep{tulving1972episodic}, \benchmark's evaluation focuses on 6 evaluation dimensions across three categories: \emph{Memory Recall}, \emph{Memory Reasoning}, and \emph{Memory Trustworthiness}.
+Table~\ref{tab:dimensions} summarizes the resulting D1--D6 dimensions.
+
+\input{tables/dimensions}
+Three design principles make those dimensions measurable in the target personal-agent setting. \emph{Ego-centric projection} means $\pi(u_i, \mathcal{D})$ restricts each user's observable history to conversations they actually participated in or witnessed. \emph{Activity-density calibration} means the workload is anchored by the ${\sim}$10K human-conversation baseline but measured over the assistant's full ego-observed dialog-text stream; \benchL averages $24.1$K tokens per agent per day with explicit day boundaries, so write pressure, recency, and temporal provenance are part of the workload. \emph{Single-world provenance} means all sessions are generated inside one coherent \masim world over persona-driven agents and Dunbar-layered social graphs (\S\ref{sec:datagen}), so recurring people, events, locations, and permissions can be traced back to logged evidence rather than stitched fragments.
+
+\jd{Formal definitions (scenario tuple, evaluation instance, scoring axioms) are in Appendix~\ref{app:formal}.}
+
+\jd{\benchmark reports D1--D6 as a diagnostic profile of personal-agent memory. The profile localizes failures across recall, temporal and cross-session reasoning, provenance, abstention, and requester-conditioned disclosure. Appendix~\ref{app:design-details} gives additional design details.}
+
+\jd{Having defined what \benchmark measures, we next describe how \masim instantiates these dimensions as coherent ego-centric worlds with co-generated dialog histories, ground truth, and evaluation instances.}

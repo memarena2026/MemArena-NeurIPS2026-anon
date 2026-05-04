@@ -1,0 +1,69 @@
+\begin{table}[t]
+\centering
+\caption{Sub-dimension accuracy on \benchL{} with mean $\pm$ std across stochastic seeds. Internal dimension IDs shown; mapping to paper dimensions: D1 Cloze $\to$ d5, D2 Metadata $\to$ d6, D3 QA $\to$ d7/d8/d10, D4 Cross-Session $\to$ d1/d2, D5 Abstention $\to$ d3, D6 Permission-Aware Access $\to$ d4. D6 is reported deterministically from raw outputs for all backends; all other answer-required dimensions use GPT-4o-mini as the primary judge.}
+\label{tab:results-L-subdim}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}ll ccccccccc@{}}
+\toprule
+& & \multicolumn{2}{c}{\textit{Cross-Sess.}} & \multicolumn{3}{c}{\textit{Factual QA}} & \multicolumn{2}{c}{\textit{Recall}} & \textit{Abst.} & \textit{Perm.} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-7} \cmidrule(lr){8-9}
+Backend & Model & Confl. & Anaph. & QA & Temp. & Adv. & Cloze & Meta. & Abst. & Perm. \\
+\midrule
+\multirow{5}{*}{Vanilla}
+  & Qwen3-0.6B     & 56.3{\scriptsize$\pm$3.0} & 17.3{\scriptsize$\pm$2.7} & 47.3{\scriptsize$\pm$3.0} & 7.0{\scriptsize$\pm$2.0} & 40.0{\scriptsize$\pm$2.6} & 44.1{\scriptsize$\pm$0.8} & 22.9{\scriptsize$\pm$1.2} & 61.2{\scriptsize$\pm$0.0} & 12.5{\scriptsize$\pm$1.7} \\
+
+  & Llama-3.2-3B   & 30.6{\scriptsize$\pm$1.0} & 19.2{\scriptsize$\pm$1.8} & 22.4{\scriptsize$\pm$2.0} & 23.3{\scriptsize$\pm$2.9} & 45.3{\scriptsize$\pm$2.1} & 57.4{\scriptsize$\pm$0.8} & 8.1{\scriptsize$\pm$0.7} & 60.2{\scriptsize$\pm$0.3} & 8.2{\scriptsize$\pm$1.6} \\
+
+  & Mistral-7B     & 52.7{\scriptsize$\pm$4.8} & 29.6{\scriptsize$\pm$2.1} & 36.1{\scriptsize$\pm$0.3} & 28.2{\scriptsize$\pm$1.3} & 74.1{\scriptsize$\pm$3.1} & 55.2{\scriptsize$\pm$0.3} & 11.2{\scriptsize$\pm$1.8} & 59.8{\scriptsize$\pm$0.3} & 11.8{\scriptsize$\pm$1.5} \\
+
+  & Qwen3-8B       & 14.9{\scriptsize$\pm$1.2} & 25.1{\scriptsize$\pm$1.9} & 12.2{\scriptsize$\pm$1.2} & 18.9{\scriptsize$\pm$0.4} & 60.2{\scriptsize$\pm$1.7} & 55.9{\scriptsize$\pm$0.6} & 5.7{\scriptsize$\pm$0.3} & 61.2{\scriptsize$\pm$0.0} & 13.3{\scriptsize$\pm$1.3} \\
+
+  & Qwen3-32B      & 8.6{\scriptsize$\pm$1.2} & 27.1{\scriptsize$\pm$1.0} & 13.5{\scriptsize$\pm$1.0} & 16.3{\scriptsize$\pm$2.2} & 81.0{\scriptsize$\pm$3.0} & 67.0{\scriptsize$\pm$0.3} & 3.6{\scriptsize$\pm$0.6} & 61.0{\scriptsize$\pm$0.9} & 13.2{\scriptsize$\pm$1.9} \\
+\midrule
+\multirow{5}{*}{RAG}
+  & Qwen3-0.6B     & 28.4{\scriptsize$\pm$2.1} & 23.5{\scriptsize$\pm$2.6} & 68.6{\scriptsize$\pm$1.2} & 34.0{\scriptsize$\pm$2.1} & 29.8{\scriptsize$\pm$2.8} & 52.7{\scriptsize$\pm$1.3} & 34.9{\scriptsize$\pm$3.7} & 18.0{\scriptsize$\pm$1.8} & 11.2{\scriptsize$\pm$0.3} \\
+
+  & Llama-3.2-3B   & 21.2{\scriptsize$\pm$3.7} & 19.4{\scriptsize$\pm$0.6} & 75.3{\scriptsize$\pm$1.8} & 24.3{\scriptsize$\pm$0.9} & 56.3{\scriptsize$\pm$1.2} & 62.3{\scriptsize$\pm$0.3} & 41.4{\scriptsize$\pm$1.6} & 33.3{\scriptsize$\pm$1.2} & 9.3{\scriptsize$\pm$1.5} \\
+
+  & Mistral-7B     & 34.5{\scriptsize$\pm$2.2} & 26.7{\scriptsize$\pm$2.2} & 75.5{\scriptsize$\pm$1.8} & 42.6{\scriptsize$\pm$0.0} & 71.4{\scriptsize$\pm$3.9} & 61.4{\scriptsize$\pm$3.1} & 41.8{\scriptsize$\pm$0.9} & 31.2{\scriptsize$\pm$3.1} & 19.2{\scriptsize$\pm$1.0} \\
+
+  & Qwen3-8B       & 30.8{\scriptsize$\pm$1.5} & 31.4{\scriptsize$\pm$2.7} & 82.9{\scriptsize$\pm$1.0} & 29.4{\scriptsize$\pm$1.8} & 75.1{\scriptsize$\pm$0.9} & 75.4{\scriptsize$\pm$0.3} & 48.3{\scriptsize$\pm$0.7} & 46.7{\scriptsize$\pm$0.9} & 15.2{\scriptsize$\pm$0.8} \\
+
+  & Qwen3-32B      & 12.5{\scriptsize$\pm$0.7} & 27.3{\scriptsize$\pm$2.2} & 82.7{\scriptsize$\pm$0.3} & 29.8{\scriptsize$\pm$0.4} & 77.5{\scriptsize$\pm$3.2} & 77.3{\scriptsize$\pm$0.5} & 49.7{\scriptsize$\pm$1.6} & 48.4{\scriptsize$\pm$2.4} & 14.3{\scriptsize$\pm$1.8} \\
+\midrule
+\multirow{5}{*}{Memobase}
+  & Qwen3-0.6B     & 8.8{\scriptsize$\pm$1.0} & 8.6{\scriptsize$\pm$3.7} & 40.4{\scriptsize$\pm$2.1} & 17.3{\scriptsize$\pm$2.1} & 35.7{\scriptsize$\pm$4.4} & 31.0{\scriptsize$\pm$1.5} & 15.2{\scriptsize$\pm$2.7} & 26.5{\scriptsize$\pm$4.1} & 6.2{\scriptsize$\pm$1.9} \\
+
+  & Llama-3.2-3B   & 3.5{\scriptsize$\pm$1.2} & 3.1{\scriptsize$\pm$0.3} & 36.5{\scriptsize$\pm$2.1} & 24.7{\scriptsize$\pm$1.6} & 38.8{\scriptsize$\pm$2.0} & 46.0{\scriptsize$\pm$2.3} & 16.6{\scriptsize$\pm$1.0} & 33.5{\scriptsize$\pm$2.1} & 7.8{\scriptsize$\pm$0.8} \\
+
+  & Mistral-7B     & 15.9{\scriptsize$\pm$2.7} & 33.1{\scriptsize$\pm$1.8} & 45.7{\scriptsize$\pm$1.8} & 33.3{\scriptsize$\pm$1.6} & 55.5{\scriptsize$\pm$2.1} & 54.0{\scriptsize$\pm$1.7} & 24.3{\scriptsize$\pm$1.6} & 48.6{\scriptsize$\pm$5.7} & 12.8{\scriptsize$\pm$1.3} \\
+
+  & Qwen3-8B       & 1.0{\scriptsize$\pm$0.3} & 24.1{\scriptsize$\pm$2.1} & 22.5{\scriptsize$\pm$1.2} & 1.4{\scriptsize$\pm$0.9} & 55.5{\scriptsize$\pm$1.8} & 47.1{\scriptsize$\pm$2.5} & 7.9{\scriptsize$\pm$0.3} & 39.6{\scriptsize$\pm$3.5} & 9.8{\scriptsize$\pm$1.0} \\
+
+  & Qwen3-32B      & 5.9{\scriptsize$\pm$1.2} & 32.2{\scriptsize$\pm$3.2} & 25.1{\scriptsize$\pm$2.2} & 3.9{\scriptsize$\pm$0.9} & 65.5{\scriptsize$\pm$0.9} & 56.2{\scriptsize$\pm$3.6} & 14.4{\scriptsize$\pm$0.9} & 41.8{\scriptsize$\pm$2.7} & 10.2{\scriptsize$\pm$2.3} \\
+\midrule
+\multirow{5}{*}{MemSearch}
+  & Qwen3-0.6B     & 30.6{\scriptsize$\pm$4.2} & 31.6{\scriptsize$\pm$2.4} & 75.7{\scriptsize$\pm$0.3} & 25.7{\scriptsize$\pm$3.7} & 42.9{\scriptsize$\pm$2.6} & 75.4{\scriptsize$\pm$1.1} & 33.7{\scriptsize$\pm$1.0} & 19.6{\scriptsize$\pm$1.5} & 11.0{\scriptsize$\pm$2.2} \\
+
+  & Llama-3.2-3B   & 19.8{\scriptsize$\pm$1.2} & 20.8{\scriptsize$\pm$2.4} & 80.4{\scriptsize$\pm$1.5} & 30.0{\scriptsize$\pm$3.1} & 60.4{\scriptsize$\pm$1.5} & 81.0{\scriptsize$\pm$1.1} & 42.2{\scriptsize$\pm$0.7} & 34.3{\scriptsize$\pm$2.1} & 16.3{\scriptsize$\pm$3.5} \\
+
+  & Mistral-7B     & 32.5{\scriptsize$\pm$3.6} & 44.1{\scriptsize$\pm$1.6} & 88.6{\scriptsize$\pm$1.2} & 47.5{\scriptsize$\pm$1.2} & 72.5{\scriptsize$\pm$0.3} & 73.6{\scriptsize$\pm$1.1} & 55.0{\scriptsize$\pm$3.1} & 24.5{\scriptsize$\pm$0.9} & 16.2{\scriptsize$\pm$1.0} \\
+
+  & Qwen3-8B       & 6.7{\scriptsize$\pm$0.7} & 27.6{\scriptsize$\pm$4.6} & 56.5{\scriptsize$\pm$3.3} & 7.4{\scriptsize$\pm$1.1} & 82.0{\scriptsize$\pm$1.5} & 79.3{\scriptsize$\pm$0.5} & 21.3{\scriptsize$\pm$1.2} & 32.5{\scriptsize$\pm$1.2} & 17.0{\scriptsize$\pm$3.0} \\
+
+  & Qwen3-32B      & 21.6{\scriptsize$\pm$1.4} & 37.3{\scriptsize$\pm$3.0} & 75.1{\scriptsize$\pm$0.7} & 16.0{\scriptsize$\pm$1.1} & 89.4{\scriptsize$\pm$1.8} & 87.2{\scriptsize$\pm$0.8} & 43.0{\scriptsize$\pm$2.7} & 37.8{\scriptsize$\pm$2.4} & 15.8{\scriptsize$\pm$2.0} \\
+\midrule
+\multirow{5}{*}{Oracle}
+  & Qwen3-0.6B     & 85.5{\scriptsize$\pm$0.3} & 53.5{\scriptsize$\pm$3.9} & 80.6{\scriptsize$\pm$0.6} & 14.8{\scriptsize$\pm$3.8} & 36.9{\scriptsize$\pm$1.2} & 77.1{\scriptsize$\pm$1.1} & 44.4{\scriptsize$\pm$1.0} & 61.0{\scriptsize$\pm$1.2} & 35.3{\scriptsize$\pm$1.5} \\
+
+  & Llama-3.2-3B   & 65.7{\scriptsize$\pm$2.7} & 72.5{\scriptsize$\pm$2.8} & 87.1{\scriptsize$\pm$0.6} & 26.3{\scriptsize$\pm$3.4} & 79.4{\scriptsize$\pm$3.3} & 90.4{\scriptsize$\pm$0.9} & 49.3{\scriptsize$\pm$0.9} & 67.3{\scriptsize$\pm$0.3} & 36.5{\scriptsize$\pm$1.0} \\
+
+  & Mistral-7B     & 83.9{\scriptsize$\pm$1.4} & 79.6{\scriptsize$\pm$1.2} & 88.6{\scriptsize$\pm$0.7} & 42.0{\scriptsize$\pm$1.1} & 81.4{\scriptsize$\pm$1.9} & 88.6{\scriptsize$\pm$0.3} & 47.9{\scriptsize$\pm$1.6} & 67.1{\scriptsize$\pm$2.9} & 39.8{\scriptsize$\pm$0.6} \\
+
+  & Qwen3-8B       & 91.6{\scriptsize$\pm$1.2} & 79.4{\scriptsize$\pm$0.6} & 91.4{\scriptsize$\pm$0.3} & 36.0{\scriptsize$\pm$0.9} & 76.1{\scriptsize$\pm$4.5} & 97.0{\scriptsize$\pm$0.0} & 51.7{\scriptsize$\pm$0.3} & 73.3{\scriptsize$\pm$0.9} & 39.0{\scriptsize$\pm$2.2} \\
+
+  & Qwen3-32B      & 95.9{\scriptsize$\pm$0.0} & 90.8{\scriptsize$\pm$1.5} & 91.6{\scriptsize$\pm$0.3} & 44.2{\scriptsize$\pm$2.6} & 94.9{\scriptsize$\pm$0.3} & 97.5{\scriptsize$\pm$0.0} & 59.0{\scriptsize$\pm$2.1} & 74.3{\scriptsize$\pm$1.9} & 39.2{\scriptsize$\pm$0.6} \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\caption{Per-cell ingest overhead for the structured-memory backends (\texttt{memobase}, \texttt{memos}) on \benchL (s1 trial seed, Spark $8$-ego $\times$ $15$-day cache build). Wall time and extraction-batch count come from the cache-build summary; energy is the sum of \texttt{energy\_j\_net} over the $15$ \texttt{day\_*\_ingest} rows of the per-query hardware log. $\mathrm{J\,/\,ego\cdot{}day}=\text{total energy}/15/8$. Mean power averages the per-day \texttt{mean\_power\_w} excluding zero-power slots.}
+\label{tab:appendix-ingest-overhead}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Reader & Backend & wall (s) & energy (kJ) & $n_\text{batches}$ & J/ego$\cdot$day & mean power (W) \\
+\midrule
+\multirow{2}{*}{Qwen3-0.6B} & \texttt{memobase} & 1712 & 52.54 & 3252 & 437.8 & 41.69 \\
+ & \texttt{memos} & 6917 & 240.46 & 3252 & 2003.8 & 45.87 \\
+\midrule
+\multirow{2}{*}{Llama-3.2-3B} & \texttt{memobase} & 2826 & 100.64 & n/a & 838.7 & 46.98 \\
+ & \texttt{memos} & 6300 & 254.11 & 3252 & 2117.6 & 52.17 \\
+\midrule
+\multirow{2}{*}{Qwen3-8B} & \texttt{memobase} & 4501 & 146.68 & 3252 & 1222.4 & 43.87 \\
+ & \texttt{memos} & 24488 & 203.61 & 3252 & 1696.7 & 33.89 \\
+\midrule
+\multirow{2}{*}{Qwen3-32B-AWQ} & \texttt{memobase} & 28715 & 1222.20 & 3252 & 10185.0 & 42.53 \\
+ & \texttt{memos} & 237158 & n/a & n/a & n/a & n/a \\
+\bottomrule
+\end{tabular}
+\end{table}

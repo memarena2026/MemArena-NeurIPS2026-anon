@@ -1,0 +1,16 @@
+\begin{table}[h]
+\centering
+\caption{Config B (closed-API strong extractor) results for all three memory backends with gpt-4.1-mini via OpenRouter. CIs are 95\% bootstrap. The Rec drop ($36$--$38$~pp) relative to on-device Qwen3-32B ($75$--$76$~pp) is \emph{not} a condensation effect: paired-ego cache audits find Config-B memory is ${\sim}7\%$ \emph{longer} than Config-A, with $-17\%$ named entities, $-38\%$ numeric tokens, and $-41\%$ date references --- a \emph{schema reformulation}. GPT-4.1-mini paraphrases atomic facts into narrative prose, which preserves entity presence (D6) but rewrites cloze choice labels (e.g.\ ``E''~$\to$~``miscommunication''), breaking exact-match grading; mechanism analysed in \S\ref{app:extractor-quality}.}
+\label{tab:configb}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}l cccc@{}}
+\toprule
+\textbf{Backend} & Rec.\ (\%) & Rea.\ (\%) & Tr.\ (\%) & Avg (\%) \\
+\midrule
+Memobase & 36.8~[32.6,~40.9] & 87.4~[85.2,~89.4] & 75.9~[68.8,~82.4] & 66.7~[64.2,~69.3] \\
+MemOS & 37.7~[33.9,~41.8] & 86.4~[84.3,~88.5] & 75.9~[69.4,~82.9] & 66.7~[63.8,~69.4] \\
+Mem0 & 37.4~[33.4,~41.6] & 86.2~[84.2,~88.5] & 77.6~[71.2,~84.1] & 67.1~[64.5,~69.8] \\
+\bottomrule
+\end{tabular}
+\end{table}

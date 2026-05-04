@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use MemArena-L, please cite the following."
+title: "MemArena: An Ego-Centric Benchmark for Multi-User Agentic Memory on On-Device Open-Weight Models"
+version: "1.0.0"
+date-released: "2026-04-24"
+license: "CC-BY-4.0"
+type: dataset
+authors:
+  - name: "Anonymous Authors"
+keywords:
+  - memory
+  - agents
+  - long-context
+  - multi-user
+  - ego-centric
+  - on-device
+  - open-weight LLMs
+  - permission-aware
+  - benchmark
+preferred-citation:
+  type: conference-paper
+  title: "MemArena: An Ego-Centric Benchmark for Multi-User Agentic Memory on On-Device Open-Weight Models"
+  year: 2026
+  collection-title: "Advances in Neural Information Processing Systems (NeurIPS), Datasets and Benchmarks Track"
+  authors:
+    - name: "Anonymous Authors"

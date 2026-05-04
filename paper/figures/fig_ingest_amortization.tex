@@ -1,0 +1,6 @@
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\textwidth]{figures/fig_ingest_amortization.pdf}
+    \caption{Cumulative answer-time energy against the zero-ingest Oracle baseline on DGX Spark, $s1$ probe. Each Oracle line passes through the origin at slope $E_{\text{Oracle/q}}$; each structured-memory line is offset on the $y$-axis by its $15$-day ingest energy and rises at slope $E_{\text{inmem/q}}$. The crossover $K = E_{\text{ingest}} / (E_{\text{Oracle/q}} - E_{\text{inmem/q}})$ marks the per-ego query volume above which the structured-memory stack costs less total energy than serving the same number of queries from the Oracle baseline. \textbf{(a)} Qwen3-0.6B tier: Memobase breaks even at $K = 5{,}171$ queries; MemOS at $K = 23{,}667$. \textbf{(b)} Qwen3-32B (AWQ) tier: Memobase breaks even at $K = 2{,}180$ queries (the higher per-query absolute cost on the large reader compresses the crossover).}
+    \label{fig:ingest-amortization}
+\end{figure}

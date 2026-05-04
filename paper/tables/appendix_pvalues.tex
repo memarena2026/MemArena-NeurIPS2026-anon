@@ -1,0 +1,31 @@
+\begin{table}[h]
+\centering
+\caption{Paired \emph{cluster} bootstrap significance tests (two-sided, $B=2000$) for structural claims on \benchL{}. \emph{A} and \emph{B} identify the two cells being compared on paired per-instance outcomes. $\Delta$ is the macro-mean accuracy difference ($A-B$) in percentage points; 95\% CI is percentile bootstrap; $p$ is two-sided (min-tail doubled). Stars: $p<0.001$ ($^{**}$), $p<0.01$ ($^{*}$). Stochastic seeds: s2/s3/s4; per-instance correctness is averaged across seeds first, then resampled at the agent level (cluster bootstrap over the 50 ego agents) so that intra-agent / intra-session correlation does not inflate the precision of the CI.}
+\label{tab:pvalues}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}ll l rrr r@{}}
+\toprule
+\textbf{A} & \textbf{B} & Metric & $\Delta$ (pp) & 95\% CI lo & 95\% CI hi & $p$ \\
+\midrule
+Memobase $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Rec & -37.66 & -42.74 & -32.28 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Rea & -32.09 & -34.72 & -29.46 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Tr & -31.84 & -36.55 & -26.63 & 0.0000$^{**}$ \\
+MemOS $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Rec & -19.25 & -24.34 & -14.06 & 0.0000$^{**}$ \\
+MemOS $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Rea & -23.38 & -26.23 & -20.42 & 0.0000$^{**}$ \\
+MemOS $\times$ Qwen3-0.6B & Oracle $\times$ Qwen3-0.6B & Tr & -29.94 & -34.98 & -24.55 & 0.0000$^{**}$ \\
+Memobase $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Rec & -38.59 & -43.98 & -33.34 & 0.0000$^{**}$ \\
+Memobase $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Rea & -44.88 & -47.66 & -42.06 & 0.0000$^{**}$ \\
+Memobase $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Tr & -31.20 & -36.49 & -26.08 & 0.0000$^{**}$ \\
+MemOS $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Rec & -20.94 & -25.62 & -16.41 & 0.0000$^{**}$ \\
+MemOS $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Rea & -33.40 & -36.19 & -30.52 & 0.0000$^{**}$ \\
+MemOS $\times$ Llama-3.2-3B & Oracle $\times$ Llama-3.2-3B & Tr & -29.01 & -34.57 & -23.72 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-8B & Oracle $\times$ Qwen3-8B & Rec & -46.81 & -51.72 & -41.64 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-8B & Oracle $\times$ Qwen3-8B & Rea & -53.97 & -56.78 & -51.21 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-8B & Oracle $\times$ Qwen3-8B & Tr & -31.45 & -37.31 & -25.97 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-32B & Oracle $\times$ Qwen3-32B & Rec & -42.91 & -47.98 & -37.70 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-32B & Oracle $\times$ Qwen3-32B & Rea & -56.97 & -59.53 & -54.38 & 0.0000$^{**}$ \\
+Memobase $\times$ Qwen3-32B & Oracle $\times$ Qwen3-32B & Tr & -30.77 & -36.56 & -25.20 & 0.0000$^{**}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

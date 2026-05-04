@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Summary of controlled ablations. Detailed setups and per-reader results are reported in the cited appendices.}
+\label{tab:ablation-summary}
+\begin{tabularx}{\textwidth}{p{0.27\textwidth}p{0.36\textwidth}X}
+\toprule
+Ablation & Key result & Takeaway \\
+\midrule
+Retrieval strength (Table~\ref{tab:p1c-rag}) & Dense retrieval improves over BM25 by $+10.7$\,pp on average, but the best cell remains $21.7$\,pp below Oracle. & Better retrieval helps, but does not close the gap. \\
+Query-time processing (Appendices~\ref{app:h2-llm-sum},~\ref{app:h4-reranker-baseline}) & Summarization and reranking degrade BM25 by $-16.7$ and $-20.6$\,pp on average. & More query-time compute is not reliably beneficial. \\
+Evidence shape (Appendices~\ref{app:review4-oracle-distract},~\ref{app:h5-oracle-structured}) & Oracle$+$distractors improves four readers by $+6.8$--$+8.6$\,pp, while structured Oracle drops $-36.7$\,pp. & Coverage helps; post-hoc structure alone does not. \\
+Social-context prompts (Appendices~\ref{app:h3-policy-header},~\ref{app:wave1},~\ref{app:d56-paraphrase}) & Policy headers, requester-identity strength, and cultural paraphrases leave \DSixID operating points essentially unchanged. & Privacy failures are not fixed by prompt wording alone. \\
+Context / projection (Table~\ref{tab:p1a-budget}) & Larger context at Qwen3-8B closes only $19\%$ of the Vanilla$\to$Oracle gap. & Scaling context is weaker than structured ingest. \\
+\bottomrule
+\end{tabularx}
+\end{table}

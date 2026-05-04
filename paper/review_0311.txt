@@ -1,0 +1,48 @@
+Technical limitations or concerns
+Substantial parts of the experimental evaluation are missing or incomplete: many tables contain placeholder dashes; several key backends (Vanilla, MemoryOS, MemOS) and model-size sweeps are not reported.
+The “on-device, open-weight” positioning is at odds with using a 235B parameter model and multi-GPU H200 servers; this undermines the claimed on-device framing and the privacy/deployment narrative.
+Several assumptions and engineering mechanisms (e.g., speculative racing that harvests canceled sessions for cloze) warrant deeper validation to confirm they don’t bias content distributions or evaluation difficulty.
+Experimental gaps or methodological issues
+Human calibration statistics are left as “??” placeholders; this makes it impossible to judge LLM-as-judge reliability and alignment to human ground truth, particularly for subjective dimensions.
+Scale and corpus inconsistencies (e.g., agents = 50 vs. 200; token counts ~1M vs. ~2M; table labels) reduce confidence in the reported setup.
+Only one backbone (Qwen3-235B) and two retrieval settings (Oracle vs. RAG) are reported at the main scale; no results are shown for Mistral, structured memories, or the 10M multimodal setting—leaving several central claims untested.
+Clarity or presentation issues
+There are many unresolved references (“?”, “Appendix ??”), missing or redacted numbers (throughput hours, human agreement, table references), and malformed tables (e.g., “— (dash)”, “line with dash”), which impede reproducibility and clarity.
+Some definitions are promised for appendices that are not provided (e.g., full scoring axioms); the exact LLM-judge prompts and rubric specifics are not summarized in the main text.
+Missing related work or comparisons
+The paper lightly touches related work but lacks direct head-to-head comparisons or positioning against several pertinent contemporaries:
+EverMemBench: multi-party workplace memory with oracle-vs-retrieval separation and multi-hop/temporal focus.
+ATM-Bench: multimodal personal memory with strong emphasis on multi-evidence aggregation and abstention, closer in spirit to MEMARENA’s trustworthiness goals.
+Recent structured/temporal memory frameworks (e.g., TiMem, TSM, SEEM, StructMemEval) that explicitly address temporal/versioning and provenance, seemingly aligned with the benchmark’s priorities.
+No ablation contrasts ego-centric vs. omniscient evaluation on the same data to quantify the importance of perspective-taking (a central claim).
+
+
+Detailed Comments
+Technical soundness evaluation
+The formal ego-centric projection is sound and the rationale compelling. The diagnostic taxonomy is well-motivated, and the decomposition into recall vs. reasoning vs. trustworthiness is likely to aid failure-mode attribution.
+The built-in ground-truth derivations from simulation logs are a strong idea for scalability; however, tasks partially sourced from LLM-written ground truth (factual QA, exception detection) require careful human calibration reporting—which is currently incomplete (placeholders).
+The reliance on LLM-as-judge is reasonable but needs concrete evidence of agreement (κ/α values per dimension) and judge prompts released for reproducibility. The claim of “strict cross-family judging” is good practice, but the generator is from the same family as some evaluated models; more explicit leakage checks are warranted.
+Experimental evaluation assessment
+The core diagnostic finding—drastic degradation of cross-session reasoning under standard RAG vs. oracle—is consistent with recent literature (EverMemBench, AMA-Bench): top-k retrieval struggles to surface multiple, distributed, provenance-sensitive pieces of evidence simultaneously.
+Unfortunately, the experimental coverage is too thin to support the broader claims. Several backends are promised but absent; model-size and family effects are not explored; multimodal results (10M tokens) are not reported despite being a headline contribution. Efficiency/latency analysis (central for on-device framing) is referred to but not shown.
+Human calibration and statistical power claims are undermined by missing numbers; without actual α/κ and CI ranges, it’s hard to assess reliability or whether the per-dimension sample sizes suffice to draw fine-grained conclusions.
+Comparison with related work (using the summaries provided)
+Relative to EverMemBench (multi-party workplace), MEMARENA’s ego-centric evaluation and privacy/permissions dimensions appear novel and complementary. Both highlight retrieval as a bottleneck and multi-hop/temporal reasoning as unsolved.
+ATM-Bench’s multimodal personal QA also emphasizes retrieval and multi-evidence aggregation with abstention. A direct empirical comparison or cross-evaluation would meaningfully position MEMARENA’s trustworthiness and permissions tasks.
+Structured/temporal memory frameworks (TiMem, TSM, SEEM) explicitly model temporal versioning, durative states, provenance, and episodic structure—capabilities tightly aligned with MEMARENA’s cross-session and trustworthiness goals. Evaluating such systems, even with smaller backbones, would substantiate claims about the benchmark’s discriminatory power.
+StructMemEval focuses on structure formation; while different in scope, it underscores a key insight echoed here: naive retrieval often suffices for shallow recall but fails where organization and provenance tracking are needed. Connecting MEMARENA’s results to structure-dependent performance would strengthen the narrative.
+Discussion of broader impact and significance
+The benchmark addresses a critical need for personal agents where information boundaries and privacy norms are central; the trustworthiness and permission-aware components are timely and important.
+The simulation-based approach enables controlled ego-centric asymmetry and provenance, offering a valuable testbed; nonetheless, synthetic artifacts remain a threat to external validity. Plans for naturalness studies are welcome; additional realism checks (e.g., linguistic variability, error/disfluency injection) would further help.
+The strict “on-device, open-weight” stance is principled, but the large backbones and multi-GPU setup contradict practical on-device constraints; including experiments with small models on realistic edge hardware would increase ecological validity.
+
+
+Questions for Authors
+Can you provide complete human-calibration results (inter-annotator agreement and judge-vs-human agreement per dimension), with concrete values replacing the current placeholders?
+Several tables have inconsistencies and placeholders (e.g., number of agents, token counts at 1M scale, throughput hours). Can you reconcile these and release finalized, consistent corpus statistics and runtime profiles?
+How do you ensure that speculative racing (harvesting canceled sessions as cloze ground truth) does not introduce sampling bias or easier-than-natural cloze questions?
+Given the strong emphasis on privacy and on-device constraints, why were the principal reported results run on a 235B model with multi-GPU servers? Can you add results with smaller models that are realistically deployable on local devices?
+Can you report head-to-head comparisons on a shared subset with EverMemBench and ATM-Bench (or cross-run their systems on your data) to position MEMARENA’s difficulty and diagnostic value?
+How sensitive are your trustworthiness and permission-aware metrics to the precise wording of rules and to adversarial prompting? Are there ablations showing robustness to prompt perturbations and adversarial strategies?
+Will you provide an ablation directly contrasting omniscient vs. ego-centric evaluation on the same conversations to quantify the effect size of perspective-taking?
+What is the exact scoring protocol for permission-aware access (D6)? Please detail the “Privacy-Utility AUC” construction, including thresholds, positive/negative labeling, and how abstention vs. partial disclosure is handled.

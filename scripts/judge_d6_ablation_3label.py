@@ -243,10 +243,10 @@ def main() -> int:
     if args.max_cells:
         cells = cells[: args.max_cells]
     print(f"D6 ablation: re-judging non-leak DENY records in {len(cells)} cells "
-          f"(workers={args.workers}, dry_run={args.dry_run}) via openai/gpt-4o-mini")
+          f"(workers={args.workers}, dry_run={args.dry_run}) via openai/gpt-4o-mini-2024-07-18")
 
     client = None if args.dry_run else _make_client()
-    model = "openai/gpt-4o-mini"
+    model = "openai/gpt-4o-mini-2024-07-18"
 
     t0 = time.time()
     overall = {"cells_done": 0, "records_done": 0, "records_skipped": 0,

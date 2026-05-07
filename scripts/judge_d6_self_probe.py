@@ -322,12 +322,12 @@ def main() -> int:
         print("Did the H100 self-probe inference run produce output here?")
         return 1
 
-    print(f"Re-judging {len(files)} self-probe files via openai/gpt-4o-mini "
+    print(f"Re-judging {len(files)} self-probe files via openai/gpt-4o-mini-2024-07-18 "
           f"(workers={args.workers}, dry_run={args.dry_run})")
     print(f"Input root: {args.input_root}")
 
     client = None if args.dry_run else _make_client()
-    model = "openai/gpt-4o-mini"
+    model = "openai/gpt-4o-mini-2024-07-18"
 
     t0 = time.time()
     overall = {

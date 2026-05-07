@@ -418,13 +418,21 @@ def _load_cell_json(path: Path) -> dict[str, tuple[int, int]]:
 # CSV "backend" tokens map to paper_data backend keys. The CSV uses "inmem"
 # (the on-disk system label) where the paper labels the same cell as "rag".
 _CSV_BACKEND_TO_PAPER: dict[str, str] = {
-    "oracle":       "oracle",
-    "vanilla":      "vanilla",        # max_tokens=512 (main-table)
-    "vanilla_full": "vanilla_full",   # default-budget (appendix ablation)
-    "inmem":        "rag",
-    "memobase":     "memobase",
-    "memsearch":    "memsearch",      # main-table replacement for memos
-    "memos":        "memos",          # appendix ablation
+    "oracle":               "oracle",
+    "vanilla":              "vanilla",          # max_tokens=512 (main-table)
+    "vanilla_full":         "vanilla_full",     # default-budget (appendix ablation)
+    "inmem":                "rag",
+    "memobase":             "memobase",
+    "memsearch":            "memsearch",        # main-table replacement for memos
+    "memos":                "memos",            # appendix ablation
+    # ablation backends (A4/A7/A8 rebuttal)
+    "oracle_gated":         "oracle_gated",     # A7: retrieval-time gating
+    "memobase_writer32":    "memobase_writer32", # A4: writer >> reader
+    "temporal_window_1d":   "temporal_1d",      # A8: temporal sweep
+    "temporal_window_3d":   "temporal_3d",
+    "temporal_window_7d":   "temporal_7d",
+    "temporal_window_15d":  "temporal_15d",
+    "temporal_window_alld": "temporal_all",
 }
 
 DEFAULT_INDEX_CSV: Path = PROJECT_ROOT / "experiments_index.csv"

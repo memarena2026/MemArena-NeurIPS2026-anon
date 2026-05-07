@@ -1,3 +1,8 @@
+"""Async orchestration for MemArena evaluation stages.
+
+The pipeline owns add/search/answer/evaluate execution, adapter lifecycle,
+artifact paths, and progress reporting for both smoke tests and full sweeps.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -278,6 +283,10 @@ class EvalPipeline:
                             _ev_sids = qa_item.metadata.get("evidence_session_ids")
                             if _ev_sids:
                                 search_kwargs["evidence_session_ids"] = _ev_sids
+                            # Pass policy_expected for oracle_gated (ALLOW/DENY filter)
+                            _policy = qa_item.metadata.get("policy_expected")
+                            if _policy:
+                                search_kwargs["policy_expected"] = _policy
                             try:
                                 hits = await self.adapter.search(**search_kwargs)
                             except TypeError:

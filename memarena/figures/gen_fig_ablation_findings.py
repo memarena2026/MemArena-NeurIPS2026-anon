@@ -160,10 +160,63 @@ def figure_f1(out_pdf: Path):
 
 
 # --------------------------------------------------------------------------
-# Figure F2: D4 accuracy across evidence pathways
+# Figure F2: TTFT decomposition (search vs prefill) across 2 readers × 4 backends
 # --------------------------------------------------------------------------
 def figure_f2(out_pdf: Path):
-    """Bar chart of pooled D4 accuracy across nine evidence pathways."""
+    """Stacked-bar TTFT decomposition: 8 cells (Qwen3-0.6B / Qwen3-32B-AWQ)
+       × (Vanilla / RAG / Memobase / MemSearch). Search/retrieval time is the
+       bottom segment, LLM prefill the top segment. Numbers from Table 3
+       (main_SML.tex) and the T_search row (ttft_main.tex)."""
+    # (reader, backend, T_search_ms, T_prefill_ms)
+    cells = [
+        ("0.6B", "Vanilla",     0,   41),
+        ("0.6B", "RAG",        87,   74),
+        ("0.6B", "Memobase",    7,   25),
+        ("0.6B", "MemSearch",  48,  165),
+        ("32B",  "Vanilla",     0,  290),
+        ("32B",  "RAG",        87, 2437),
+        ("32B",  "Memobase",    7, 1482),
+        ("32B",  "MemSearch",  48, 3582),
+    ]
+    x = np.array([0, 1, 2, 3, 4.7, 5.7, 6.7, 7.7])
+    search = np.array([c[2] for c in cells])
+    prefill = np.array([c[3] for c in cells])
+    total = search + prefill
+    labels = [c[1] for c in cells]
+
+    fig, ax = plt.subplots(figsize=(6.6, 4.0))
+    ax.bar(x, search,  width=0.85, color="#1f77b4", edgecolor="white", lw=0.7,
+           label="Memory search")
+    ax.bar(x, prefill, width=0.85, bottom=search, color="#ff7f0e", edgecolor="white", lw=0.7,
+           label="LLM prefill")
+    for xi, t in zip(x, total):
+        ax.text(xi, t + max(total) * 0.012, f"{t}", ha="center", va="bottom",
+                fontsize=8.2, color="#333")
+    ymax = max(total) * 1.18
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=18, ha="right", fontsize=8.8)
+    ax.text(1.5, ymax * 0.78, "Qwen3-0.6B", ha="center", va="top",
+            fontsize=10, fontweight="bold", color="#222")
+    ax.text(6.2, ymax * 0.78, "Qwen3-32B-AWQ", ha="center", va="top",
+            fontsize=10, fontweight="bold", color="#222")
+    ax.axvline(4.0 - 0.15, color="#bbbbbb", lw=0.7, ls="--", alpha=0.8)
+    ax.set_ylabel("End-to-end TTFT (ms)", fontsize=10)
+    ax.set_ylim(0, ymax)
+    ax.legend(loc="upper left", fontsize=9, frameon=False)
+    ax.grid(axis="y", alpha=0.18)
+    fig.tight_layout()
+    fig.savefig(out_pdf, bbox_inches="tight")
+    fig.savefig(out_pdf.with_suffix(".png"), bbox_inches="tight", dpi=160)
+    plt.close(fig)
+    print(f"Wrote {out_pdf}")
+    for r, b, s, p in cells:
+        print(f"  {r:<5} {b:<10} search={s:>3} prefill={p:>5} total={s+p:>5}")
+    return  # skip the old D4-pooling code below
+
+    # OLD D4-pooling code retained below for reference (unreachable)
+    rows = list(csv.DictReader(INDEX_CSV.open()))
+    main = [r for r in rows if r["table"] == "main_5x5x3"
+            and r["trial"] in {"s2", "s3", "s4"}]
     rows = list(csv.DictReader(INDEX_CSV.open()))
     main = [r for r in rows if r["table"] == "main_5x5x3"
             and r["trial"] in {"s2", "s3", "s4"}]
@@ -221,36 +274,36 @@ def figure_f2(out_pdf: Path):
         labels.append(name)
         colors.append(col)
 
-    # Portrait layout: horizontal bars, conditions stacked top→bottom.
-    fig, ax = plt.subplots(figsize=(4.4, 5.6))
-    y = np.arange(len(labels))[::-1]  # top-down so first label at top
-    bars = ax.barh(y, accs, color=colors, edgecolor="white", lw=0.7)
+    # Landscape layout: vertical bars, conditions left→right.
+    fig, ax = plt.subplots(figsize=(5.8, 4.0))
+    x = np.arange(len(labels))
+    bars = ax.bar(x, accs, color=colors, edgecolor="white", lw=0.7)
     # Highlight Oracle bar.
     if labels and labels[0] == "Oracle":
         bars[0].set_edgecolor("#1c4e9b")
         bars[0].set_linewidth(1.6)
     # Reference: Oracle ceiling.
     if labels and labels[0] == "Oracle":
-        ax.axvline(accs[0], color="#1c4e9b", lw=0.6, ls=":", alpha=0.7)
-        ax.text(accs[0] + 1.5, y[0] - 0.4,
-                f"Oracle\nceiling\n{accs[0]:.1f}%",
-                color="#1c4e9b", fontsize=8.0, ha="left", va="top")
-    # Numeric labels at the right of each bar.
-    for yi, v in zip(y, accs):
-        ax.text(v + 1.2, yi, f"{v:.1f}", ha="left", va="center",
-                fontsize=8.2, color="#333")
+        ax.axhline(accs[0], color="#1c4e9b", lw=0.6, ls=":", alpha=0.7)
+        ax.text(len(labels) - 0.6, accs[0] + 1.5,
+                f"Oracle ceiling {accs[0]:.1f}%",
+                color="#1c4e9b", fontsize=8.0, ha="right", va="bottom")
+    # Numeric labels above each bar.
+    for xi, v in zip(x, accs):
+        ax.text(xi, v + 1.5, f"{v:.1f}", ha="center", va="bottom",
+                fontsize=8.0, color="#333")
     # Group divider between main backends and retriever-side variants.
-    ax.axhline(y[4] - 0.5, color="#bbbbbb", lw=0.6, ls="--", alpha=0.7)
-    ax.text(85, y[2], "main\nbackends",
+    ax.axvline(4.5, color="#bbbbbb", lw=0.6, ls="--", alpha=0.7)
+    ax.text(2.0, 92, "main backends",
             ha="center", va="center", fontsize=8.0, color="#666", style="italic")
-    ax.text(85, y[7], "retrieval-side\n ablations /\n omniscient",
+    ax.text(7.0, 92, "retrieval-side ablations / omniscient",
             ha="center", va="center", fontsize=8.0, color="#666", style="italic")
-    ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=8.8)
-    ax.set_xlabel("D4 cross-session reasoning accuracy (%)", fontsize=10)
-    ax.set_xlim(0, 100)
-    ax.set_xticks([0, 20, 40, 60, 80, 100])
-    ax.grid(axis="x", alpha=0.18)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=28, ha="right", fontsize=8.6)
+    ax.set_ylabel("D4 cross-session reasoning accuracy (%)", fontsize=10)
+    ax.set_ylim(0, 100)
+    ax.set_yticks([0, 20, 40, 60, 80, 100])
+    ax.grid(axis="y", alpha=0.18)
     fig.tight_layout()
     fig.savefig(out_pdf, bbox_inches="tight")
     fig.savefig(out_pdf.with_suffix(".png"), bbox_inches="tight", dpi=160)

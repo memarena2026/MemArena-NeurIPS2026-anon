@@ -39,7 +39,7 @@ EVAL_INSTANCES = REPO_ROOT / "data" / "benchmark" / "eval_instances" / "d4_permi
 OUT_ROOT = REPO_ROOT / "out" / "d6_armB_2026-05-03"
 
 JUDGE_ENDPOINT = "https://openrouter.ai/api/v1"
-JUDGE_MODEL = "openai/gpt-4o-mini"
+JUDGE_MODEL = "openai/gpt-4o-mini-2024-07-18"
 JUDGE_TEMPERATURE = 0.0
 JUDGE_CONCURRENCY = 32
 JUDGE_MAX_RETRIES = 3

@@ -391,7 +391,7 @@ def main():
     parser.add_argument("--reader-endpoint", default="http://127.0.0.1:8110/v1")
     parser.add_argument("--reader-api-key", default="EMPTY")
     parser.add_argument("--judge-endpoint", default="https://openrouter.ai/api/v1")
-    parser.add_argument("--judge-model", default="openai/gpt-4o-mini")
+    parser.add_argument("--judge-model", default="openai/gpt-4o-mini-2024-07-18")
     parser.add_argument("--openrouter-api-key", default=os.getenv("OPENROUTER_API_KEY", ""))
     parser.add_argument("--seed", type=int, required=True, choices=[1, 2, 3])
     parser.add_argument("--dims", nargs="+", default=["d3_confabulation", "d4_permission"])

@@ -148,7 +148,7 @@ for model in "${!MODEL_NAME[@]}"; do
       --expected-memory-system memsearch \
       --expected-config A_paired \
       --answer-concurrency 32 --eval-concurrency 512 \
-      --remote-judge-model openai/gpt-4o-mini \
+      --remote-judge-model openai/gpt-4o-mini-2024-07-18 \
       --remote-judge-endpoint https://openrouter.ai/api/v1 \
       --judge-api-key "$OPENROUTER_API_KEY" \
       --force \

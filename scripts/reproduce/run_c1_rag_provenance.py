@@ -4,7 +4,7 @@
 Retriever: BGE-M3 top-5 (frozen, no λ or fusion).
 Chunk header: [session=<sid> day=<day_idx> speaker=<agent> time=<ts>]
 Reader: Qwen3-8B (bf16) on :8110, GPU 1.
-Judge: openai/gpt-4o-mini via OpenRouter.
+Judge: openai/gpt-4o-mini-2024-07-18 via OpenRouter.
 
 Usage:
     python3 scripts/run_c1_rag_provenance.py --seed 1
@@ -302,7 +302,7 @@ def main():
     parser.add_argument("--reader-endpoint", default="http://127.0.0.1:8110/v1")
     parser.add_argument("--reader-api-key", default="EMPTY")
     parser.add_argument("--judge-endpoint", default="https://openrouter.ai/api/v1")
-    parser.add_argument("--judge-model", default="openai/gpt-4o-mini")
+    parser.add_argument("--judge-model", default="openai/gpt-4o-mini-2024-07-18")
     parser.add_argument("--openrouter-api-key", default=os.getenv("OPENROUTER_API_KEY", ""))
     parser.add_argument("--dims", nargs="+",
                         default=["d1_conflict", "d2_anaphora", "d3_confabulation",

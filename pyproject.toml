@@ -68,7 +68,7 @@ judge = [
 [project.urls]
 Homepage = "https://example.com/anonymous/MemArena"
 Repository = "https://example.com/anonymous/MemArena"
-"Dataset (Hugging Face)" = "https://huggingface.co/datasets/zthsecondantigravity/memarena-l"
+"Dataset (Hugging Face)" = "https://huggingface.co/datasets/anonymous/memarena-l"
 
 [project.scripts]
 memarena-download = "scripts.download_dataset:main"

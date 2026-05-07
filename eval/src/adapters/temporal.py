@@ -1,10 +1,15 @@
+"""Temporal-window retrieval adapter for recency ablations.
+
+The adapter scores messages with the normal in-memory retriever, then restricts
+candidate evidence to a configurable window before the query anchor time.
+"""
 from __future__ import annotations
 
 import math
 import re
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 from rank_bm25 import BM25Okapi
@@ -57,6 +62,7 @@ class TemporalAdapter(RetrievalAdapter):
         *,
         half_life_days: float = 30.0,
         temporal_alpha: float = 0.5,
+        window_days: Optional[float] = None,
     ) -> None:
         self._messages: Dict[str, List[MessageEntry]] = defaultdict(list)
         self._index: Dict[str, BM25Okapi] = {}
@@ -64,6 +70,7 @@ class TemporalAdapter(RetrievalAdapter):
         self._half_life_days = max(1.0, float(half_life_days))
         self._decay_lambda = math.log(2) / self._half_life_days
         self._temporal_alpha = max(0.0, min(1.0, float(temporal_alpha)))
+        self._window_days: Optional[float] = float(window_days) if window_days is not None else None
 
     async def add(self, *, namespace: str, messages: List[MessageEntry]) -> dict:
         # Bulk-store messages and INVALIDATE any cached BM25 index — the index
@@ -79,12 +86,23 @@ class TemporalAdapter(RetrievalAdapter):
             "mode": "temporal",
             "half_life_days": self._half_life_days,
             "temporal_alpha": self._temporal_alpha,
+            "window_days": self._window_days,
         }
 
-    async def search(self, *, namespace: str, query: str, top_k: int) -> List[SearchHit]:
+    async def search(self, *, namespace: str, query: str, top_k: int, **kwargs) -> List[SearchHit]:
         rows = self._messages.get(namespace, [])
         if not rows:
             return []
+
+        # Apply temporal window: discard messages older than window_days before
+        # the most recent message in this namespace.
+        if self._window_days is not None:
+            all_ts = [_to_epoch(m.occur_ts) for m in rows]
+            max_ts_all = max(all_ts) if all_ts else 0.0
+            cutoff_ts = max_ts_all - self._window_days * 86400.0
+            rows = [m for m in rows if _to_epoch(m.occur_ts) >= cutoff_ts]
+            if not rows:
+                return []
 
         bm25 = self._index.get(namespace)
         if bm25 is None:

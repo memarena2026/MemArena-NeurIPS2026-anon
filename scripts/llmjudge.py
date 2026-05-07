@@ -224,7 +224,7 @@ def _resolve_judge(args: argparse.Namespace) -> tuple[str, str, str, str]:
     preset = str(args.judge_preset or "openrouter").lower()
     if preset in {"openrouter", "remote", "4omini", "gpt4omini", "gpt-4o-mini"}:
         endpoint = _normalise_openai_base(args.judge_endpoint or OPENROUTER_ENDPOINT)
-        model = args.judge_model or "openai/gpt-4o-mini"
+        model = args.judge_model or "openai/gpt-4o-mini-2024-07-18"
         api_key = _first_api_key(
             [args.judge_api_key, os.getenv("OPENROUTER_API_KEY"), os.getenv("OPENAI_API_KEY")],
             allow_empty=False,

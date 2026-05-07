@@ -558,7 +558,7 @@ def parse_args() -> argparse.Namespace:
                     help="OpenRouter API key for the judge")
     p.add_argument("--judge-endpoint", default="https://openrouter.ai/api/v1",
                     help="Judge endpoint")
-    p.add_argument("--judge-model", default="openai/gpt-4o-mini",
+    p.add_argument("--judge-model", default="openai/gpt-4o-mini-2024-07-18",
                     help="Judge model on OpenRouter")
     p.add_argument("--concurrency", type=int, default=32,
                     help="Max concurrent requests")

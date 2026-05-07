@@ -36,7 +36,7 @@ TRIALS=(${TRIALS:-s2 s3 s4})
 BACKENDS_CSV="${BACKENDS:-vanilla,oracle,baseline_simplerag}"
 IFS=',' read -r -a BACKENDS <<<"$BACKENDS_CSV"
 RUN_DIR="${RUN_DIR:-data/benchmark}"
-JUDGE_MODEL="${REMOTE_JUDGE_MODEL:-openai/gpt-4o-mini}"
+JUDGE_MODEL="${REMOTE_JUDGE_MODEL:-openai/gpt-4o-mini-2024-07-18}"
 JUDGE_ENDPOINT="${REMOTE_JUDGE_ENDPOINT:-https://openrouter.ai/api/v1}"
 JUDGE_CONCURRENCY="${JUDGE_CONCURRENCY:-512}"
 

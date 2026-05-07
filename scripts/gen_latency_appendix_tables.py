@@ -39,10 +39,11 @@ def write_fit_table(d: dict) -> None:
     lines = [
         r"\begin{table}[!htbp]",
         r"\centering",
-        r"\small",
+        r"\scriptsize",
+        r"\setlength{\tabcolsep}{3pt}",
         r"\caption{Per-reader linear LLM-generation latency fit on Spark GB10 (\texttt{concurrency=1}). The model is $T_{\text{LLM}} = \alpha + \beta N_p + \gamma N_c$. Fit data is the union of vanilla / oracle / inmem cells (\S\ref{app:lat:fit}). $|r|_{\text{p95}}$ is the absolute residual at the 95th percentile.}",
         r"\label{tab:appendix-latency-fit}",
-        r"\begin{tabular}{lrrrrrr}",
+        r"\begin{tabular}{@{}lrrrrrr@{}}",
         r"\toprule",
         r"Reader & $\alpha$ (ms) & $\beta$ (ms\,/\,1k prompt tok) & $\gamma$ (ms\,/\,compl tok) & $R^2$ & $n_{\text{obs}}$ & $|r|_{\text{p95}}$ (ms) \\",
         r"\midrule",

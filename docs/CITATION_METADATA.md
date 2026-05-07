@@ -63,7 +63,7 @@ title, author list, proceedings/arXiv URL, and dataset URL once available.
 
 Before public release, replace these placeholders everywhere:
 
-- `https://arxiv.org/abs/TODO`
-- `https://huggingface.co/datasets/zthsecondantigravity/memarena-l`
+- `<ANONYMOUS-PAPER-URL>`
+- `https://huggingface.co/datasets/anonymous/memarena-l`
 - any remaining placeholder Hugging Face dataset URL
-- any `TODO` citation fields
+- any remaining placeholder citation fields

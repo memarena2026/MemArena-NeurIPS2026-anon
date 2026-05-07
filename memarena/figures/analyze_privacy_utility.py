@@ -53,7 +53,7 @@ _LEGACY_D6_BASE = RUN_ROOT / "eval_results" / "d6_rebuild_2026-04-27"
 _D6_BASE = _NEW_D6_BASE if (_NEW_D6_BASE / "per_item_armB_s2").exists() else _LEGACY_D6_BASE
 PER_ITEM_DIRS = [_D6_BASE / f"per_item_armB_{t}" for t in TRIAL_NAMES]
 # d4_permission.jsonl ships with the MemArena-L Hugging Face dataset
-# (zthsecondantigravity/memarena-l) and is materialised under data/benchmark/
+# (set MEMARENA_HF_REPO_ID) and is materialised under data/benchmark/
 # by scripts/download_dataset.py. Fall back to the legacy MASim/runs/ path.
 _DATASET_EVAL_INSTANCES = REPO_ROOT / "data" / "benchmark" / "eval_instances" / "d4_permission.jsonl"
 EVAL_INSTANCES = (

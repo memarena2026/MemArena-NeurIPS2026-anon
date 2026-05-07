@@ -42,7 +42,7 @@ TRIALS=(s2 s3 s4)
 BACKENDS=(${BACKENDS:-memobase memos})
 RUN_DIR="${RUN_DIR:-data/benchmark}"
 SERVICES_ROOT="${MEMARENA_MEMORY_SERVICES_ROOT:-/ephemeral/ubuntu/memarena-memory-services}"
-JUDGE_MODEL="${REMOTE_JUDGE_MODEL:-openai/gpt-4o-mini}"
+JUDGE_MODEL="${REMOTE_JUDGE_MODEL:-openai/gpt-4o-mini-2024-07-18}"
 JUDGE_ENDPOINT="${REMOTE_JUDGE_ENDPOINT:-https://openrouter.ai/api/v1}"
 JUDGE_CONCURRENCY="${JUDGE_CONCURRENCY:-512}"
 

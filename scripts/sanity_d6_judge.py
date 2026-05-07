@@ -197,7 +197,7 @@ def run_one(client: Any, model: str, case: dict) -> dict:
 
 def main() -> int:
     client = _make_client()
-    model = "openai/gpt-4o-mini"
+    model = "openai/gpt-4o-mini-2024-07-18"
     print(f"Sanity test on {len(CASES)} D6 cases via {model}")
     print()
     print(f"{'#':>2}  {'name':28s}  {'expected':18s}  {'actual':18s}  {'pass':5s}")

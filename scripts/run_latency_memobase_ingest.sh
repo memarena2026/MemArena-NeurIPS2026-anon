@@ -32,7 +32,7 @@ OUT_DIR="${OUT_ROOT}/${NS}"
 SGLANG_PORT="${SGLANG_PORT:-17000}"
 GPU_DEVICES="${GPU_DEVICES:-0}"
 SGLANG_MEM_FRACTION="${SGLANG_MEM_FRACTION:-0.85}"   # memobase ingest doesn't need ollama
-SERVICES_ROOT="${MEMARENA_MEMORY_SERVICES_ROOT:-/path/to/memarena-services
+SERVICES_ROOT="${MEMARENA_MEMORY_SERVICES_ROOT:-${HOME}/memarena-memory-services}"
 
 mkdir -p "$OUT_DIR/logs" "$OUT_DIR/hw"
 LOG="$OUT_DIR/logs/ingest_memobase_${MODEL}_${TRIAL}.log"

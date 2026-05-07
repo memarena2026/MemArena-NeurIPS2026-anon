@@ -1,3 +1,8 @@
+"""Answer-generation logic shared by MemArena evaluation runs.
+
+This module builds reader prompts from retrieved evidence, calls local or
+hosted chat-completion endpoints, and records answer artifacts with metadata.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -208,6 +213,13 @@ class AnswerConfig:
     # self_ego runs should be written to a separate directory so the third_party
     # results are not overwritten.
     d6_probe_mode: str = "third_party"
+
+    # G3a: reader-side norm-binding test.
+    # When True, injects [access:DENY] or [access:ALLOW] into the prompt for
+    # d4_permission items at scoring time, derived from policy_expected in QA
+    # metadata. Tests whether the reader can bind explicit access markers to
+    # disclosure decisions (without this, F2's claim stands; with it, F2 must soften).
+    d6_inject_access_marker: bool = False
 
     # Test mode preserves the real pipeline shape but replaces all answer-side
     # LLM/OpenClaw calls with a fixed local string.
@@ -582,6 +594,15 @@ class AnswerEngine:
 
         _qa_dim = str((qa.metadata or {}).get("dimension")
                       or (qa.metadata or {}).get("task_family") or "")
+
+        # G3a: inject [access:DENY]/[access:ALLOW] marker for norm-binding test
+        if getattr(self.cfg, "d6_inject_access_marker", False) and _qa_dim == "d4_permission":
+            _pexp = str((qa.metadata or {}).get("policy_expected") or "")
+            if "DENY" in _pexp:
+                payload["access_policy"] = "[access:DENY]"
+            elif "ALLOW" in _pexp:
+                payload["access_policy"] = "[access:ALLOW]"
+
         if _qa_dim == "d4_permission":
             _meta = qa.metadata or {}
             # Paired-probe protocol: in self_ego mode, override the asker to
@@ -806,6 +827,21 @@ class AnswerEngine:
             max_context_chars=eff_ctx,
             d6_arm=getattr(self.cfg, "d6_arm", "A"),
         )
+
+        # G3a: inject [access:DENY]/[access:ALLOW] marker for norm-binding test
+        if getattr(self.cfg, "d6_inject_access_marker", False):
+            _dim = str(instance.get("dimension") or "")
+            if _dim == "d4_permission":
+                _pexp = str(instance.get("metadata", {}).get("policy_expected") or "")
+                if "DENY" in _pexp:
+                    _marker = "[access:DENY]"
+                elif "ALLOW" in _pexp:
+                    _marker = "[access:ALLOW]"
+                else:
+                    _marker = ""
+                if _marker:
+                    user_p = f"Access policy: {_marker}\n\n{user_p}"
+
         return system_p, user_p
 
     async def _call_llm_text(self, system: str, user: str) -> tuple[str, dict]:

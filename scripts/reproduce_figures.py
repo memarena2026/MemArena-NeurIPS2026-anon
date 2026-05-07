@@ -44,7 +44,6 @@ FIGURE_MODULES: list[tuple[str, str]] = [
     ("analyze_extractor_tradeoff", "Table: extractor accuracy-vs-latency tradeoff"),
     ("analyze_refusal_provenance", "Table: refusal provenance audit"),
     ("gen_tables",                "Dispatch: all paper tables"),
-    ("gen_pvalues",               "Table: bootstrap p-values"),
     ("gen_privacy_table",         "Table: privacy / utility"),
     ("gen_tokenf1",               "Table: token-level F1"),
     # generate_tables_figures is a "rerun everything" meta-dispatcher that

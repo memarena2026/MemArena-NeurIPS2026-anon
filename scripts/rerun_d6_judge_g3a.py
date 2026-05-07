@@ -1,24 +1,15 @@
-"""Phase 3: full D6 rerun on the 75 main_5x5x3 cells using the new 5-label rubric.
+"""Re-judge D6 records in G3a (reader-side norm-binding) cells under out/g3a_access_marker_*.
 
-Reads predictions from existing ``evaluation_results_*.json`` files (the
-``prediction`` field), runs the new judge, writes back updated label / reason /
-correctness / fact_in_output for every d4_perm_* record. Backs up the
-original file to ``*_legacy.json`` once per cell on first touch.
+G3a cells were run with --d6-inject-access (oracle × 5 readers × 3 seeds, d4_permission only).
+The evaluate stage already populated ``policy_category`` via openai/gpt-4o-mini-2024-07-18 but
+did not add ``rationale_v2``. This script fills rationale_v2 and harmonises all D6 fields using
+the same 5-label rubric as the main pipeline.
 
-Inputs:
-  - ``experiments_index.csv`` resolved via paper_data.load_all_cells(
-      include_ablation=False).
-  - ``OPENROUTER_API_KEY`` / ``OPENROUTER_BASE_URL`` from .env.
-
-Concurrency: 16 worker threads, retry up to 3x with backoff. Empty
-predictions are short-circuited (no API call) per ``_score_d4_armB``.
-
-Idempotency: if a record already has the new vocabulary in ``policy_category``
-(one of D6_LABELS) and a non-empty ``rationale_v2``, skip it. So the script
-is safe to rerun on partial output.
+Idempotent: each record is skipped if it already has a label in
+``D6_LABELS`` and a non-empty ``rationale_v2``.
 
 Run:
-    python3 scripts/rerun_d6_judge.py [--max-cells N] [--dry-run]
+    python3 scripts/rerun_d6_judge_g3a.py [--max-files N] [--dry-run] [--workers N]
 """
 from __future__ import annotations
 
@@ -54,7 +45,11 @@ def _load_env() -> dict[str, str]:
 def _make_client():
     env = _load_env()
     api_key = env.get("OPENROUTER_API_KEY") or os.getenv("OPENROUTER_API_KEY")
-    base_url = env.get("OPENROUTER_BASE_URL") or os.getenv("OPENROUTER_BASE_URL") or "https://openrouter.ai/api/v1"
+    base_url = (
+        env.get("OPENROUTER_BASE_URL")
+        or os.getenv("OPENROUTER_BASE_URL")
+        or "https://openrouter.ai/api/v1"
+    )
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY not found in .env or env vars")
     from openai import OpenAI
@@ -68,9 +63,6 @@ def _judge_record(
     gold_fact: str,
     max_retries: int = 3,
 ) -> tuple[str, bool, str, str]:
-    """Run new D6 judge on one record. Returns (label, fact_in_output,
-    rationale, reason_token). Empty prediction is short-circuited to
-    OTHER without API call."""
     from eval.src.scoring import (
         _ARMB_JUDGE_SYSTEM,
         _build_armB_user,
@@ -88,7 +80,7 @@ def _judge_record(
 
     user_msg = _build_armB_user(
         prediction=pred,
-        question=rec.get("question_id", ""),  # qid in lieu of original question text
+        question=rec.get("question_id", ""),
         gt={"fact": gold_fact},
     )
     last_err = None
@@ -113,15 +105,14 @@ def _judge_record(
         except Exception as e:
             last_err = e
             time.sleep(1.5 ** attempt)
-    # All retries failed
     ok, reason = _armB_correctness("PARSE_ERROR", expected_mode)
     return "PARSE_ERROR", False, f"judge_error: {last_err}"[:200], reason
 
 
 @dataclass
-class CellStats:
-    cell_key: tuple
-    n_total: int = 0
+class FileStats:
+    path: Path
+    n_d4: int = 0
     n_done: int = 0
     n_skipped: int = 0
     n_error: int = 0
@@ -131,66 +122,51 @@ class CellStats:
         self.label_counts = {}
 
 
-def process_cell(
+def process_file(
     json_path: Path,
-    cell_key: tuple,
     client: Any,
     model: str,
     dry_run: bool = False,
-) -> CellStats:
-    """Re-judge all d4_perm_* records in one evaluation_results JSON file.
-    Backs up original to *_legacy.json on first touch. Idempotent."""
-    from eval.src.scoring import D6_LABELS
+) -> FileStats:
+    from eval.src.scoring import D6_LABELS, _armB_correctness
 
-    stats = CellStats(cell_key=cell_key)
-
+    stats = FileStats(path=json_path)
     backup_path = json_path.with_name(json_path.stem + "_legacy.json")
-    data = json.loads(json_path.read_text())
-    details = data.get("details", [])
-
-    # Identify d4_perm records
-    d4_records = [
-        (i, d) for i, d in enumerate(details)
-        if str(d.get("question_id", "")).startswith("d4_perm")
-    ]
-    stats.n_total = len(d4_records)
+    try:
+        data = json.loads(json_path.read_text())
+    except Exception as exc:
+        print(f"  SKIP unreadable {json_path}: {exc}")
+        return stats
+    details = data.get("details", []) if isinstance(data, dict) else []
+    d4_records = [(i, d) for i, d in enumerate(details)
+                  if str(d.get("question_id", "")).startswith("d4_perm")]
+    stats.n_d4 = len(d4_records)
     if not d4_records:
         return stats
 
-    # First-touch backup (only if not already backed up)
     if not backup_path.exists() and not dry_run:
         shutil.copyfile(json_path, backup_path)
 
-    # Process each record
     for i, rec in d4_records:
-        # Idempotency: skip if already in new vocabulary
         existing_cat = str(rec.get("policy_category") or "").upper()
         if existing_cat in D6_LABELS and rec.get("rationale_v2"):
             stats.n_skipped += 1
             stats.label_counts[existing_cat] = stats.label_counts.get(existing_cat, 0) + 1
             continue
 
-        # Pull gold fact from record (it's already in the existing details)
         gold_fact = str(rec.get("gold_answer") or "")
         if dry_run:
-            label = "DRY_RUN"
-            fact_in = False
-            rationale = ""
-            reason = ""
+            label, fact_in, rationale, reason = "DRY_RUN", False, "", ""
         else:
             label, fact_in, rationale, reason = _judge_record(client, model, rec, gold_fact)
 
-        # Compute correctness
-        from eval.src.scoring import _armB_correctness
         expected_mode = str(rec.get("expected_answer_mode") or "").lower()
-        ok, _reason = _armB_correctness(label, expected_mode)
-
-        # Update record in place
+        ok, _r = _armB_correctness(label, expected_mode)
         if not dry_run:
-            rec["policy_category"] = label  # new value vocabulary
+            rec["policy_category"] = label
             rec["leaked_fact_in_output"] = fact_in
-            rec["rationale_v2"] = rationale  # new diagnostic field
-            rec["reason"] = reason  # update reason token to new vocabulary
+            rec["rationale_v2"] = rationale
+            rec["reason"] = reason
             rec["correct"] = ok
             rec["score"] = 1.0 if ok else 0.0
 
@@ -201,73 +177,88 @@ def process_cell(
 
     if not dry_run:
         json_path.write_text(json.dumps(data, indent=2))
-
     return stats
+
+
+def discover_g3a_files() -> list[Path]:
+    """Find every evaluation_results JSON under out/g3a_access_marker_*/."""
+    root = REPO_ROOT / "out"
+    out: list[Path] = []
+    for gdir in sorted(root.glob("g3a_access_marker_*")):
+        if not gdir.is_dir():
+            continue
+        for p in gdir.rglob("evaluation_results*.json"):
+            if p.stem.endswith("_legacy"):
+                continue
+            out.append(p)
+    return sorted(out)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--max-cells", type=int, default=None,
-                        help="Limit to first N cells (for debugging)")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Don't call API, don't write files")
-    parser.add_argument("--workers", type=int, default=16)
+    parser.add_argument("--max-files", type=int, default=None)
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--workers", type=int, default=32)
     args = parser.parse_args()
 
-    from memarena.figures.paper_data import load_all_cells
-    grid = load_all_cells(include_ablation=False)
-    cells = sorted(grid.items())
-    if args.max_cells:
-        cells = cells[: args.max_cells]
-    print(f"Re-judging {len(cells)} cells via openai/gpt-4o-mini-2024-07-18 (workers={args.workers}, dry_run={args.dry_run})")
+    files = discover_g3a_files()
+    if args.max_files:
+        files = files[: args.max_files]
+    if not files:
+        print("No G3a files found under out/g3a_access_marker_*/.")
+        return 1
 
-    if args.dry_run:
-        client = None
-    else:
-        client = _make_client()
+    needs = 0
+    for p in files:
+        try:
+            data = json.loads(p.read_text())
+        except Exception:
+            continue
+        for d in data.get("details", []):
+            qid = str(d.get("question_id", ""))
+            if not qid.startswith("d4_perm"):
+                continue
+            cat = str(d.get("policy_category") or "").upper()
+            if cat in {"DISCLOSE_CORRECT", "DISCLOSE_WRONG", "DONT_KNOW", "REFUSE", "OTHER", "PARSE_ERROR"} \
+               and d.get("rationale_v2"):
+                continue
+            needs += 1
+    print(f"Discovered {len(files)} G3a files; {needs} records need re-judging "
+          f"(workers={args.workers}, dry_run={args.dry_run}) via openai/gpt-4o-mini-2024-07-18")
+
+    client = None if args.dry_run else _make_client()
     model = "openai/gpt-4o-mini-2024-07-18"
 
     t0 = time.time()
-    overall = {
-        "cells_done": 0, "records_done": 0, "records_skipped": 0,
-        "records_error": 0, "label_counts": {},
-    }
+    overall = {"files_done": 0, "records_done": 0, "records_skipped": 0,
+               "records_error": 0, "label_counts": {}}
 
-    with ThreadPoolExecutor(max_workers=args.workers) as executor:
-        futures = {
-            executor.submit(process_cell, cell.source_path, key, client, model, args.dry_run): key
-            for key, cell in cells
-        }
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        futures = {ex.submit(process_file, p, client, model, args.dry_run): p for p in files}
         for fut in as_completed(futures):
-            key = futures[fut]
+            p = futures[fut]
             try:
-                s: CellStats = fut.result()
+                s: FileStats = fut.result()
             except Exception as e:
-                print(f"  cell {key} FAILED with {type(e).__name__}: {e}")
+                print(f"  file {p.name} FAILED with {type(e).__name__}: {e}")
                 continue
-            overall["cells_done"] += 1
+            overall["files_done"] += 1
             overall["records_done"] += s.n_done
             overall["records_skipped"] += s.n_skipped
             overall["records_error"] += s.n_error
             for k, v in (s.label_counts or {}).items():
                 overall["label_counts"][k] = overall["label_counts"].get(k, 0) + v
-
             elapsed = time.time() - t0
             rate = overall["records_done"] / elapsed if elapsed > 0 else 0
-            est_total = (overall["records_done"] + (len(cells) - overall["cells_done"]) * 200)
-            eta_s = (est_total - overall["records_done"]) / rate if rate > 0 else 0
-            print(
-                f"[{overall['cells_done']:>2}/{len(cells)}] {key}  "
-                f"+{s.n_done}done +{s.n_skipped}skip +{s.n_error}err  "
-                f"labels={s.label_counts}  "
-                f"elapsed={elapsed:.0f}s rate={rate:.1f}/s eta={eta_s:.0f}s"
-            )
+            print(f"[{overall['files_done']:>3}/{len(files)}] {p.relative_to(REPO_ROOT)}  "
+                  f"+{s.n_done}done +{s.n_skipped}skip +{s.n_error}err  "
+                  f"labels={s.label_counts}  rate={rate:.1f}/s")
 
     elapsed = time.time() - t0
     print()
     print("=" * 70)
     print(f"DONE in {elapsed:.0f}s")
-    print(f"  cells_done={overall['cells_done']}/{len(cells)}")
+    print(f"  files_done={overall['files_done']}/{len(files)}")
     print(f"  records_done={overall['records_done']}")
     print(f"  records_skipped={overall['records_skipped']}")
     print(f"  records_error={overall['records_error']}")

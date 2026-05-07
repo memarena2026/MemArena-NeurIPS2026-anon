@@ -32,7 +32,7 @@ from memarena.runtime import configure_live_output
 RELEASE_VERSION = "1.0.0"
 DEFAULT_REPO_ID = os.environ.get(
     "MEMARENA_HF_REPO_ID",
-    "zthsecondantigravity/memarena-l",
+    "anonymous/memarena-l",
 )
 
 BENCHMARK_ENTRIES = {

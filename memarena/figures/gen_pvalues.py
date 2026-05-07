@@ -349,6 +349,19 @@ def _stars(p: float) -> str:
     return ""
 
 
+def _format_p(p: float, B: int = BOOTSTRAP_B) -> str:
+    """Format p-values without implying an exact zero.
+
+    With ``B`` bootstrap iterations, a zero empirical tail count means the
+    p-value is below the bootstrap resolution, not that the true p-value is
+    literally zero.
+    """
+    min_p = 2.0 / B
+    if p < min_p - 1e-12:
+        return "$<\\!0.001^{**}$"
+    return f"{p:.4f}{_stars(p)}"
+
+
 def main() -> None:
     grid = load_all_cells(DEFAULT_RUN)
     qid_to_agent = _load_qid_to_agent(DEFAULT_RUN)
@@ -388,7 +401,7 @@ def main() -> None:
             rows.append(
                 f"{label_A} & {label_B} & {metric} "
                 f"& {delta * 100:+.2f} & {lo * 100:+.2f} & {hi * 100:+.2f} "
-                f"& {p:.4f}{_stars(p)} \\\\"
+                f"& {_format_p(p)} \\\\"
             )
 
     tex = (
@@ -398,8 +411,9 @@ def main() -> None:
         "\\emph{A} and \\emph{B} identify the two cells being compared on "
         "paired per-instance outcomes. $\\Delta$ is the macro-mean accuracy "
         "difference ($A-B$) in percentage points; 95\\% CI is percentile "
-        "bootstrap; $p$ is two-sided (min-tail doubled). Stars: $p<0.001$ "
-        "($^{**}$), $p<0.01$ ($^{*}$). Stochastic seeds: s2/s3/s4; per-"
+        "bootstrap; $p$ is two-sided (min-tail doubled), reported as "
+        "$<\\!0.001$ when the empirical tail mass is below the $B=2000$ "
+        "resolution limit. Stars: $p<0.001$ ($^{**}$), $p<0.01$ ($^{*}$). Stochastic seeds: s2/s3/s4; per-"
         "instance correctness is averaged across seeds first, then "
         "resampled at the agent level (cluster bootstrap over the 50 ego "
         "agents) so that intra-agent / intra-session correlation does not "

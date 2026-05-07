@@ -49,7 +49,7 @@ Examples:
     --backends memobase,memos \\
     --trials s2,s3,s4 \\
     --judge-preset remote \\
-    --remote-judge-model openai/gpt-4o-mini \\
+    --remote-judge-model openai/gpt-4o-mini-2024-07-18 \\
     --remote-judge-endpoint https://openrouter.ai/api/v1
 EOF
 }

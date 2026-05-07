@@ -75,7 +75,7 @@ AUTONOMOUS_FEATURES = {"autonomous_privacy"}
 # ---------------------------------------------------------------------------
 
 # Hardcoded location of the D4 permission ground-truth file. This ships as
-# part of the MemArena-L Hugging Face dataset (zthsecondantigravity/memarena-l)
+# part of the MemArena-L Hugging Face dataset (set MEMARENA_HF_REPO_ID)
 # and lands at data/benchmark/eval_instances/ after running
 # scripts/download_dataset.py.
 D4_PERMISSION_JSONL = (

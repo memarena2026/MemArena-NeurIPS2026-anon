@@ -409,7 +409,7 @@ def main():
     eval_p.add_argument("--reader-endpoint", default="http://127.0.0.1:8113/v1")
     eval_p.add_argument("--reader-api-key", default="EMPTY")
     eval_p.add_argument("--judge-endpoint", default="https://openrouter.ai/api/v1")
-    eval_p.add_argument("--judge-model", default="openai/gpt-4o-mini")
+    eval_p.add_argument("--judge-model", default="openai/gpt-4o-mini-2024-07-18")
     eval_p.add_argument("--judge-api-key", default=os.getenv("OPENROUTER_API_KEY", ""))
     eval_p.add_argument("--no-think", action="store_true")
     eval_p.add_argument("--concurrency", type=int, default=32)

@@ -1,3 +1,8 @@
+"""Command-line entry point for running MemArena add/search/answer/evaluate stages.
+
+The CLI wires YAML configuration, memory-backend adapters, answer generation,
+and scoring into one reproducible evaluation command used by the run scripts.
+"""
 from __future__ import annotations
 
 import argparse
@@ -182,7 +187,7 @@ def _answer_cfg_from_yaml(doc: Dict[str, Any]) -> AnswerConfig:
     raw_endpoint = _expand_env(str(a["endpoint"]) if a.get("endpoint") is not None else None)
 
     j = doc.get("judge") if isinstance(doc.get("judge"), dict) else {}
-    j_model = str(j.get("model") or "gpt-4o-mini")
+    j_model = str(j.get("model") or "gpt-4o-mini-2024-07-18")
     j_raw_endpoint = _expand_env(str(j["endpoint"]) if j.get("endpoint") is not None else None)
     j_raw_key = _expand_env(str(j["api_key"]) if j.get("api_key") is not None else None)
     j_endpoint, j_api_key = _resolve_judge_endpoint_and_key(j_raw_endpoint, j_raw_key)
@@ -343,6 +348,7 @@ def parse_args() -> argparse.Namespace:
             "hybrid_rrf",
             "inmem_text_sessions",
             "inmem_provenance",
+            "oracle_gated",
         ],
         default="inmem",
         help=(
@@ -369,6 +375,8 @@ def parse_args() -> argparse.Namespace:
                     help="memory_cache: assert every cache row has this config (A_paired|B_remote)")
     ap.add_argument("--cache-strict", action=argparse.BooleanOptionalAction, default=True,
                     help="memory_cache: raise on cache-miss lookups (default True)")
+    ap.add_argument("--temporal-window-days", type=float, default=None,
+                    help="temporal adapter: only consider messages within this many days of the most recent message (default: all)")
     ap.add_argument("--stages", nargs="+", default=["add"], choices=["add", "search", "answer", "evaluate"])
     ap.add_argument("--namespace", type=str, default="run")
     ap.add_argument("--run-id", type=str, default=None, help="Optional stable run id (overrides namespace)")
@@ -408,6 +416,11 @@ def parse_args() -> argparse.Namespace:
                          "of the access-control behavioural test. Outputs from "
                          "self_ego runs SHOULD use a separate --output-dir so "
                          "they do not overwrite the third_party results.")
+    ap.add_argument("--d6-inject-access", action=argparse.BooleanOptionalAction, default=False,
+                    help="G3a norm-binding test: inject [access:DENY]/[access:ALLOW] "
+                         "into the prompt for d4_permission items at scoring time. "
+                         "Tests whether the reader can bind explicit access markers "
+                         "to disclosure decisions.")
 
     # quick smoke switches
     ap.add_argument("--smoke", action="store_true")
@@ -603,6 +616,7 @@ async def _main_async(args: argparse.Namespace) -> None:
     answer_cfg.prompt_variant = args.prompt_variant
     answer_cfg.d6_arm = str(getattr(args, "d6_arm", "A") or "A").upper()
     answer_cfg.d6_probe_mode = str(getattr(args, "d6_probe_mode", "third_party") or "third_party").lower()
+    answer_cfg.d6_inject_access_marker = bool(getattr(args, "d6_inject_access", False))
     answer_cfg.interleaved_mode = bool(args.interleaved)
     answer_cfg.show_progress = bool(args.progress)
     answer_cfg.verbose = bool(args.verbose)
@@ -718,6 +732,18 @@ async def _main_async(args: argparse.Namespace) -> None:
             args.messages = str(transcript_path)
         if not args.qa:
             args.qa = str(qa_auto_path)
+
+    if selected_system == "temporal" and getattr(args, "temporal_window_days", None) is not None:
+        temporal_cfg = cfg_doc.get("temporal") if isinstance(cfg_doc.get("temporal"), dict) else {}
+        temporal_cfg["window_days"] = float(args.temporal_window_days)
+        cfg_doc["temporal"] = temporal_cfg
+
+    if selected_system == "oracle_gated":
+        # oracle_gated behaves like oracle for staging purposes
+        args.interleaved = False
+        answer_cfg.interleaved_mode = False
+        if not any(s in args.stages for s in ["answer"]):
+            args.stages = ["answer"]
 
     if selected_system == "memory_cache":
         if not args.cache_path:

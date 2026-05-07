@@ -117,7 +117,7 @@ def main() -> int:
         "--run-dir", str(REPO_ROOT / "data/benchmark"),
         "--answer-path", str(answer_path),
         "--judge-preset", "remote",
-        "--judge-model", "openai/gpt-4o-mini",
+        "--judge-model", "openai/gpt-4o-mini-2024-07-18",
         "--judge-endpoint", "https://openrouter.ai/api/v1",
         "--judge-api-key", api_key,
         "--concurrency", str(args.judge_concurrency),

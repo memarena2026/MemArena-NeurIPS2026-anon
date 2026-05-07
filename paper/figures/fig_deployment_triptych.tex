@@ -1,7 +1,0 @@
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\textwidth]{figures/fig_deployment_triptych.pdf}
-    \vspace{-4pt}
-    \caption{On-device deployment trade-offs on DGX Spark. \textbf{(a)} Online serving cost. Labels show median first-token latency and prompt size; RAG minimizes prompt-processing cost, while structured memory stays well below full-history prompting. \textbf{(b)} Answer-time energy and thermals. Labels show mean J/query and peak temperature; structured memory is efficient at Qwen3-8B, but 32B remains expensive. \textbf{(c)} Ingest overhead for the Qwen3-8B structured backends. Each point shows total cache-build time and ingest energy, with main-table Avg attached; Memobase and MemOS are similarly accurate, but MemOS ingests much more slowly.}
-    \label{fig:deployment-triptych}
-\end{figure}

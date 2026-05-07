@@ -2,9 +2,9 @@
 
 The main `scripts/rerun_d6_judge.py` only walks cells listed in
 `experiments_index.csv` (75 main_5x5x3 + 30 vanilla_full/memos ablations); it
-misses the 142 evaluation-results JSON files under `out/ablations_l_*`
+misses evaluation-results JSON files under `out/ablations_l_*`
 (retrieval-side, distractor, policy-header, omniscient, top-k sweeps, etc.)
-that were committed by H200 but never registered. This script walks that
+that may have been produced by standalone ablation runs. This script walks that
 tree directly and applies the same 5-label rubric used for main_5x5x3.
 
 Idempotent: each record is skipped if it already has a label in
@@ -182,10 +182,17 @@ def process_file(
     return stats
 
 
-def discover_ablation_files() -> list[Path]:
+def discover_ablation_files(root_override: str | None = None) -> list[Path]:
     """Find every evaluation_results JSON under out/ablations_l_*/eval_results_*."""
+    if root_override:
+        search_root = Path(root_override)
+        out: list[Path] = []
+        for p in search_root.rglob("evaluation_results*.json"):
+            if not p.stem.endswith("_legacy"):
+                out.append(p)
+        return sorted(out)
     root = REPO_ROOT / "out"
-    out: list[Path] = []
+    out = []
     for adir in sorted(root.glob("ablations_l_*")):
         if not adir.is_dir():
             continue
@@ -201,9 +208,11 @@ def main() -> int:
     parser.add_argument("--max-files", type=int, default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--workers", type=int, default=16)
+    parser.add_argument("--root", type=str, default=None,
+                        help="Override root dir to scan (instead of out/ablations_l_*/)")
     args = parser.parse_args()
 
-    files = discover_ablation_files()
+    files = discover_ablation_files(args.root)
     if args.max_files:
         files = files[: args.max_files]
     if not files:
@@ -226,10 +235,10 @@ def main() -> int:
                 continue
             needs += 1
     print(f"Discovered {len(files)} ablation files; {needs} records need re-judging "
-          f"(workers={args.workers}, dry_run={args.dry_run}) via openai/gpt-4o-mini")
+          f"(workers={args.workers}, dry_run={args.dry_run}) via openai/gpt-4o-mini-2024-07-18")
 
     client = None if args.dry_run else _make_client()
-    model = "openai/gpt-4o-mini"
+    model = "openai/gpt-4o-mini-2024-07-18"
 
     t0 = time.time()
     overall = {"files_done": 0, "records_done": 0, "records_skipped": 0,

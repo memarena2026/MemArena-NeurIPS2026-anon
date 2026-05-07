@@ -19,7 +19,7 @@ Usage notes:
   figure generators second (slower; matplotlib backends). Within each
   group order does not matter — scripts are independent.
 * If you need to skip one, pass its label as ``--skip`` (can be repeated).
-  Example: ``python generate_tables_figures.py --skip pvalues --skip fig_d6``.
+  Example: ``python generate_tables_figures.py --skip fig_d6``.
 """
 
 from __future__ import annotations
@@ -42,8 +42,6 @@ TABLE_GENERATORS = [
      "Table 8 — Token F1 per open-ended dim (appendix_L_f1)"),
     ("privacy_table", PAPER_DIR / "gen_privacy_table.py",
      "Table 9 — D6 withhold/false-refuse (appendix_L_privacy)"),
-    ("pvalues",       PAPER_DIR / "gen_pvalues.py",
-     "Paired bootstrap p-value table (appendix_pvalues)"),
 ]
 
 FIGURE_GENERATORS = [

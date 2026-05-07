@@ -187,17 +187,17 @@ def _draw_panel_a(ax, tp):
     ax.add_patch(cause1_box)
     ax.add_patch(ideal_box)
     ax.text(0.65, 0.93, "Cause 2: retrieves AND leaks\n(Oracle cluster)",
-            fontsize=9, color="#9b1c1c", ha="center", va="top", fontweight="bold")
-    ax.text(0.15, 0.36, "Cause 1:\ndoesn't retrieve\n(privacy by amnesia)",
-            fontsize=8.5, color="#1c4e9b", ha="center", va="top", fontweight="bold")
+            fontsize=12, color="#9b1c1c", ha="center", va="top", fontweight="bold")
+    ax.text(0.15, 0.36, "Cause 1:\npoor retrieval",
+            fontsize=11, color="#1c4e9b", ha="center", va="top", fontweight="bold")
     ax.text(0.65, 0.27, "ideal: retrieves AND gates\n(EMPTY)",
-            fontsize=9, color="#7a5a00", ha="center", va="top", fontweight="bold")
+            fontsize=12, color="#7a5a00", ha="center", va="top", fontweight="bold")
 
     # Diagonal y=x (policy-blind reference)
     diag = np.linspace(0, AX_MAX, 40)
     ax.plot(diag, diag, color="black", lw=0.8, ls=":", alpha=0.55)
-    ax.text(0.50, 0.55, r"$y=x$ (policy-blind)", fontsize=8.5, color="#444",
-            rotation=38, rotation_mode="anchor", ha="left", va="bottom")
+    ax.text(0.55, 0.50, r"$y=x$ (policy-blind)", fontsize=11, color="#444",
+            rotation=38, rotation_mode="anchor", ha="left", va="top")
 
     # Plot 25 cells
     for backend in BACKENDS:
@@ -215,16 +215,16 @@ def _draw_panel_a(ax, tp):
     ax.scatter([1.0], [0.0], marker="*", s=200, color="#d4af37",
                edgecolor="black", lw=0.8, zorder=5)
     ax.annotate("ideal\n(1, 0)", xy=(1.0, 0.0), xytext=(0.85, 0.10),
-                fontsize=8, color="#7a5a00", ha="center",
+                fontsize=11, color="#7a5a00", ha="center",
                 arrowprops=dict(arrowstyle="-", lw=0.6, color="#7a5a00"))
 
     ax.set_xlim(-0.02, 1.02)
     ax.set_ylim(-0.02, 1.02)
     ax.set_xlabel(r"Correct-disclosure rate on ALLOW (retrieval $\rightarrow$)",
-                  fontsize=10)
+                  fontsize=12)
     ax.set_ylabel(r"Fact-leak rate on DENY (failed to gate $\rightarrow$)",
-                  fontsize=10)
-    ax.set_title("Two failure modes: 25 cells", fontsize=11)
+                  fontsize=12)
+    ax.tick_params(labelsize=11)
     ax.grid(alpha=0.2)
 
 
@@ -272,23 +272,29 @@ def main():
     # ====================================================================
     # Standalone panel (a) — for main text wrapfigure
     # ====================================================================
-    fig_a, ax_a = plt.subplots(figsize=(5.4, 5.0))
+    fig_a, ax_a = plt.subplots(figsize=(6.7, 4.0))
     _draw_panel_a(ax_a, tp)
-    # Compact legend at the bottom of the single panel
-    backend_handles = [plt.Line2D([0], [0], marker="o", lw=0, markersize=7,
+    backend_handles = [plt.Line2D([0], [0], marker="o", lw=0, markersize=8,
                                   markerfacecolor=BACKEND_COLOR[b],
                                   markeredgecolor="white", markeredgewidth=0.5,
                                   label=BACKEND_LABEL[b]) for b in BACKENDS]
     reader_handles = [plt.Line2D([0], [0], marker=READER_MARKER[r], lw=0,
-                                 markersize=7, color="black",
+                                 markersize=8, color="black",
                                  markerfacecolor="white",
                                  label=MODEL_TEX[r]) for r in MODEL_ORDER]
-    fig_a.legend(handles=backend_handles + reader_handles,
-                 loc="lower center", ncol=5,
-                 fontsize=7.5, frameon=False, bbox_to_anchor=(0.5, -0.05))
-    fig_a.tight_layout(rect=(0, 0.07, 1, 1))
-    fig_a.savefig(OUT_PDF, bbox_inches="tight")
-    fig_a.savefig(OUT_PNG, bbox_inches="tight", dpi=160)
+    # Side legends — Backend on the left, Reader on the right (outside axes)
+    leg_b = ax_a.legend(handles=backend_handles, loc="center right",
+                        bbox_to_anchor=(-0.20, 0.5), fontsize=10,
+                        frameon=False, title="Backend", title_fontsize=10)
+    ax_a.add_artist(leg_b)
+    leg_r = ax_a.legend(handles=reader_handles, loc="center left",
+                        bbox_to_anchor=(1.03, 0.5), fontsize=10,
+                        frameon=False, title="Reader", title_fontsize=10)
+    fig_a.tight_layout(rect=(0.14, 0, 0.88, 1))
+    fig_a.savefig(OUT_PDF, bbox_inches="tight", pad_inches=0.15,
+                  bbox_extra_artists=[leg_b, leg_r])
+    fig_a.savefig(OUT_PNG, bbox_inches="tight", dpi=160, pad_inches=0.15,
+                  bbox_extra_artists=[leg_b, leg_r])
     plt.close(fig_a)
     print(f"Wrote {OUT_PDF}")
     print(f"Wrote {OUT_PNG}")

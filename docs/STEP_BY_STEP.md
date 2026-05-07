@@ -89,7 +89,7 @@ the eval-instance subsets.
 
 Before upload, make sure `out/hf_public/croissant.json` uses the final
 Hugging Face dataset URL:
-`https://huggingface.co/datasets/zthsecondantigravity/memarena-l`.
+`https://huggingface.co/datasets/anonymous/memarena-l`.
 
 Upload:
 

@@ -7,7 +7,7 @@
 #   4. Falls back to "EMPTY" (for local/sglang endpoints that don't require a key)
 #
 # Judge resolution (for the evaluate stage that scores answers):
-#   Default judge model is gpt-4o-mini. The pipeline will auto-judge during
+#   Default judge model is gpt-4o-mini-2024-07-18 (date-pinned). The pipeline will auto-judge during
 #   the `evaluate` stage. To run the pipeline you must set ONE of:
 #     export OPENAI_API_KEY=sk-...               # judges via api.openai.com
 #     export OPENROUTER_API_KEY=sk-or-v1-...     # judges via openrouter.ai
@@ -50,11 +50,15 @@ answer:
 # ---------------------------------------------------------------------------
 # Judge model (used during the `evaluate` stage to score answers)
 # ---------------------------------------------------------------------------
-# Default: gpt-4o-mini. Endpoint switches between OpenAI and OpenRouter
+# Default: gpt-4o-mini-2024-07-18 (date-pinned snapshot the rolling
+# `gpt-4o-mini` alias resolved to during MemArena's April-May 2026 runs).
+# Pinning the snapshot rather than the alias keeps future scores
+# comparable to the published baselines even if OpenAI later reassigns
+# the rolling alias. Endpoint switches between OpenAI and OpenRouter
 # based on which API key env var is set (see header comment for details).
 # Override per-run with --judge-model / --judge-endpoint / --judge-api-key.
 judge:
-  model: "gpt-4o-mini"
+  model: "gpt-4o-mini-2024-07-18"
   # endpoint + api_key are auto-resolved at runtime. To pin explicitly,
   # uncomment one of the option blocks below:
   #

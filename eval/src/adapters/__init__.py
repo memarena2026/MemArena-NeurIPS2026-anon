@@ -1,3 +1,8 @@
+"""Registry for MemArena retrieval adapters used by the evaluation pipeline.
+
+This module maps `--system` names such as `inmem`, `memobase`, `temporal`, and
+`oracle_gated` to their adapter classes and exposes a small factory helper.
+"""
 from __future__ import annotations
 
 from pathlib import Path
@@ -9,6 +14,7 @@ from .vanilla import VanillaAdapter
 from .oracle_retrieval import OracleRetrievalAdapter
 # Backward compat alias
 FullContextAdapter = OracleRetrievalAdapter
+from .oracle_gated import OracleGatedAdapter
 from .oracle_with_distractors import OracleWithDistractorsAdapter
 from .oracle_with_random_distractors import OracleWithRandomDistractorsAdapter
 from .noop import NoopAdapter
@@ -44,6 +50,8 @@ def build_adapter(system: str, *, cfg: Dict[str, Any], output_dir: Path) -> Retr
         )
     if s in {"llm", "oracle", "oracle_retrieval"}:
         return OracleRetrievalAdapter(max_messages=int(llm_context_cfg.get("max_messages", 2000)))
+    if s == "oracle_gated":
+        return OracleGatedAdapter(max_messages=int(llm_context_cfg.get("max_messages", 2000)))
     if s == "oracle_with_distractors":
         return OracleWithDistractorsAdapter(max_messages=int(llm_context_cfg.get("max_messages", 2000)))
     if s == "oracle_with_random_distractors":
@@ -80,6 +88,7 @@ def build_adapter(system: str, *, cfg: Dict[str, Any], output_dir: Path) -> Retr
         return TemporalAdapter(
             half_life_days=float(temporal_cfg.get("half_life_days", 30)),
             temporal_alpha=float(temporal_cfg.get("temporal_alpha", 0.5)),
+            window_days=temporal_cfg.get("window_days"),
         )
     if s == "memory_cache":
         mc_cfg = cfg.get("memory_cache") if isinstance(cfg.get("memory_cache"), dict) else {}
@@ -116,6 +125,7 @@ __all__ = [
     "InMemoryAdapter",
     "VanillaAdapter",
     "OracleRetrievalAdapter",
+    "OracleGatedAdapter",
     "OracleWithDistractorsAdapter",
     "OracleWithRandomDistractorsAdapter",
     "FullContextAdapter",

@@ -125,4 +125,16 @@ for i in "${!pids[@]}"; do
 done
 
 ok=$((${#pids[@]} - failed))
-log "=== done: ${ok}/${#pids[@]} cells succeeded, $failed failed ==="
+log "=== inference done: ${ok}/${#pids[@]} cells succeeded, $failed failed ==="
+
+# Run judge_d6_self_probe.py
+log "=== Judging D6 self-probe answers (judge_d6_self_probe.py) ==="
+[[ -f .env ]] && { set -a; . .env; set +a; }
+"$PYTHON" scripts/judge_d6_self_probe.py \
+  --input-root "$OUT_BASE" \
+  --workers 32 \
+  2>&1 | tee /tmp/d6_selfprobe_judge.log
+log "Judging done"
+
+log "Outputs are left under ${OUT_BASE}/; no repository staging, commit, or push is performed."
+log "=== D6 self-probe DONE ==="
